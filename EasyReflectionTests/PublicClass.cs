@@ -15,5 +15,13 @@ namespace EasyReflectionTests
         private string PrivateProperty { get; set; }
 
         protected string ProtectedProperty { get; set; }
+
+        public string publicField;
+
+        internal string internalField;
+
+        private string privateField;
+
+        protected string protectedField;
     }
 }

@@ -109,16 +109,75 @@ namespace System.Reflection
 
         private static PropertyInfo GetAnyProperty(IEnumerable<PropertyInfo> propertyInfo, string propertyName)
         {
-            return propertyInfo.First(p => p.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase));
+            return propertyInfo.FirstOrDefault(p => p.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase));
         }
         #endregion
 
-
-
-        public static IEnumerable<PropertyInfo> GetPrivateFields(this Type t)
+        #region Fields (Groups)
+        public static IEnumerable<FieldInfo> GetPublicFields(this Type t)
         {
-            return t.GetProperties(BindingFlags.NonPublic);
+            return GetAllFields(t, p => p.IsPublic);
         }
+
+        public static IEnumerable<FieldInfo> GetPrivateFields(this Type t)
+        {
+            var fields = GetAllFields(t, p => p.IsPrivate);
+            var fieldsWithoutPropertyBackingFields = fields.Where(f => f.Name.StartsWith("<") == false && f.Name.EndsWith("k__BackingField") == false);
+            return fieldsWithoutPropertyBackingFields;
+        }
+
+        public static IEnumerable<FieldInfo> GetInternalFields(this Type t)
+        {
+            return GetAllFields(t, p => p.IsAssembly);
+        }
+
+        public static IEnumerable<FieldInfo> GetProtectedFields(this Type t)
+        {
+            return GetAllFields(t, p => p.IsFamily);
+        }
+
+        public static IEnumerable<FieldInfo> GetAllFields(Type t)
+        {
+            return t.GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+        }
+
+        private static IEnumerable<FieldInfo> GetAllFields(Type t, Func<FieldInfo, bool> whereClause)
+        {
+            return GetAllFields(t).Where(whereClause);
+        }
+        #endregion
+
+        #region Fields (Individual)
+        public static FieldInfo GetPublicField(this Type t, string propertyName)
+        {
+            return GetAnyField(t.GetPublicFields(), propertyName);
+        }
+
+        public static FieldInfo GetPrivateField(this Type t, string propertyName)
+        {
+            return GetAnyField(t.GetPrivateFields(), propertyName);
+        }
+
+        public static FieldInfo GetInternalField(this Type t, string propertyName)
+        {
+            return GetAnyField(t.GetInternalFields(), propertyName);
+        }
+
+        public static FieldInfo GetProtectedField(this Type t, string propertyName)
+        {
+            return GetAnyField(t.GetProtectedFields(), propertyName);
+        }
+
+        public static FieldInfo GetAnyField(this Type t, string propertyName)
+        {
+            return GetAnyField(GetAllFields(t), propertyName);
+        }
+
+        private static FieldInfo GetAnyField(IEnumerable<FieldInfo> fieldInfo, string propertyName)
+        {
+            return fieldInfo.First(p => p.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase));
+        }
+        #endregion
 
         public static IEnumerable<MethodInfo> GetPublicMethods(this Type t)
         {

@@ -37,7 +37,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ReflectorTests.cs" />
+    <Compile Include="ObjectExtensionsTests.cs" />
+    <Compile Include="TypeExtensionsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicClass.cs" />
   </ItemGroup>

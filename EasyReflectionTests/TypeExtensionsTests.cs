@@ -139,5 +139,70 @@ namespace EasyReflectionTests
             Assert.AreEqual("ProtectedProperty", propertyInfo.Name);
         }
         #endregion
+
+        #region Fields (Groups)
+        [Test]
+        public void GetsPublicFields()
+        {
+            var fieldInfo = this.publicClassType.GetPublicFields();
+            Assert.AreEqual(1, fieldInfo.Count());
+            Assert.AreEqual("publicField", fieldInfo.First().Name);
+        }
+
+        [Test]
+        public void GetsPrivateFields()
+        {
+            var fieldInfo = this.publicClassType.GetPrivateFields();
+            Assert.AreEqual(1, fieldInfo.Count());
+            Assert.AreEqual("privateField", fieldInfo.First().Name);
+        }
+
+        [Test]
+        public void GetsInternalFields()
+        {
+            var fieldInfo = this.publicClassType.GetInternalFields();
+            Assert.AreEqual(1, fieldInfo.Count());
+            Assert.AreEqual("internalField", fieldInfo.First().Name);
+        }
+
+        [Test]
+        public void GetsProtectedFields()
+        {
+            var fieldInfo = this.publicClassType.GetProtectedFields();
+            Assert.AreEqual(1, fieldInfo.Count());
+            Assert.AreEqual("protectedField", fieldInfo.First().Name);
+        }
+        #endregion
+
+        #region Fields (Individual)
+        [Test]
+        public void GetsPublicField()
+        {
+            var fieldInfo = this.publicClassType.GetPublicField("publicField");
+            Assert.AreEqual("publicField", fieldInfo.Name);
+        }
+
+        [Test]
+        public void GetsPrivateField()
+        {
+            var fieldInfo = this.publicClassType.GetPrivateField("privateField");
+            Assert.AreEqual("privateField", fieldInfo.Name);
+        }
+
+        [Test]
+        public void GetsInternalField()
+        {
+            var fieldInfo = this.publicClassType.GetInternalField("internalField");
+            Assert.AreEqual("internalField", fieldInfo.Name);
+        }
+
+        [Test]
+        public void GetsProtectedField()
+        {
+            var fieldInfo = this.publicClassType.GetProtectedField("protectedField");
+            Assert.AreEqual("protectedField", fieldInfo.Name);
+        }
+
+        #endregion
     }
 }
