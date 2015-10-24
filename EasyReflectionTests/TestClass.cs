@@ -70,5 +70,30 @@ namespace EasyReflectionTests
         {
             addItemTo.Add("newItemForStatic");
         }
+
+        public string PublicGenericMethod<T>(int number)
+        {
+            return "PublicGenericMethod:" + typeof(T).ToString() + number;
+        }
+
+        private string PrivateGenericMethod<T>()
+        {
+            return "PrivateGenericMethod:" + typeof(T).ToString() ;
+        }
+
+        internal string InternalGenericMethod<T>()
+        {
+            return "InternalGenericMethod:" + typeof(T).ToString();
+        }
+
+        protected string ProtectedGenericMethod<T>()
+        {
+            return "ProtectedGenericMethod:" + typeof(T).ToString();
+        }
+
+        private static string PrivateStaticGenericMethod<T>(int number)
+        {
+            return "PrivateStaticGenericMethod:" + typeof(T).ToString() + number;
+        }
     }
 }

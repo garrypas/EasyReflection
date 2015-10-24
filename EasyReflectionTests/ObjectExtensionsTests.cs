@@ -71,5 +71,17 @@ namespace EasyReflectionTests
         }
 
         #endregion
+
+        #region Generic Method Invokation
+
+        [Test]
+        public void InvokesInstanceGenericMethod()
+        {
+            var genericParameters = new Type[] { typeof(int) };
+            string result = new TestClass().InvokeGeneric<string>("PublicGenericMethod", genericParameters, 123);
+            Assert.AreEqual("PublicGenericMethod:" + typeof(int).ToString() + "123", result);
+        }
+    
+        #endregion
     }
 }

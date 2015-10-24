@@ -207,30 +207,33 @@ namespace EasyReflectionTests
         [Test]
         public void GetsPublicMethods()
         {
-            var expectedMethods = new[] { "GetType", "ToString", "GetHashCode", "Equals", "PublicMethod" };
+            var expectedMethodNames = new[] { "PublicMethod", "PublicGenericMethod", "GetType", "ToString", "GetHashCode", "Equals" };
             var methodInfo = this.publicClassType.GetPublicMethods();
-            methodInfo.GetNames().Should().BeEquivalentTo(expectedMethods).And.HaveSameCount(expectedMethods);
+            methodInfo.GetNames().Should().BeEquivalentTo(expectedMethodNames).And.HaveSameCount(expectedMethodNames);
         }
 
         [Test]
         public void GetsPrivateMethods()
         {
+            var expectedMethodNames = new[] { "PrivateMethod", "PrivateGenericMethod" };
             var methodInfo = this.publicClassType.GetPrivateMethods();
-            methodInfo.GetNames().Should().Contain("PrivateMethod").And.HaveCount(1);
+            methodInfo.GetNames().Should().BeEquivalentTo(expectedMethodNames).And.HaveSameCount(expectedMethodNames);
         }
 
         [Test]
         public void GetsInternalMethods()
         {
+            var expectedMethodNames = new[] { "InternalMethod", "InternalGenericMethod" };
             var methodInfo = this.publicClassType.GetInternalMethods();
-            methodInfo.GetNames().Should().Contain("InternalMethod").And.HaveCount(1);
+            methodInfo.GetNames().Should().BeEquivalentTo(expectedMethodNames).And.HaveSameCount(expectedMethodNames);
         }
 
         [Test]
         public void GetsProtectedMethods()
         {
+            var expectedMethodNames = new[] { "ProtectedMethod", "ProtectedGenericMethod" };
             var methodInfo = this.publicClassType.GetProtectedMethods();
-            methodInfo.GetNames().Should().Contain("ProtectedMethod").And.HaveCount(1);
+            methodInfo.GetNames().Should().BeEquivalentTo(expectedMethodNames).And.HaveSameCount(expectedMethodNames);
         }
         #endregion
 
@@ -276,7 +279,8 @@ namespace EasyReflectionTests
         public void GetsPrivateStaticMethods()
         {
             var StaticMethodInfo = this.publicClassType.GetPrivateStaticMethods();
-            StaticMethodInfo.GetNames().Should().Contain("PrivateStaticMethod").And.HaveCount(1);
+            var expectedMethods = new[] { "PrivateStaticMethod", "PrivateStaticGenericMethod" };
+            StaticMethodInfo.GetNames().Should().BeEquivalentTo(expectedMethods).And.HaveCount(2);
         }
 
         [Test]
@@ -331,6 +335,15 @@ namespace EasyReflectionTests
             var inst = new TestClass();
             int result = typeof(TestClass).Invoke<int>("PrivateStaticMethod", 1, 2);
             Assert.AreEqual(3, result);
+        }
+
+        [Test]
+        public void InvokesStaticGenericMethod()
+        {
+            var inst = new TestClass();
+            var genericParameters = new[] { typeof(int) };
+            var result = typeof(TestClass).InvokeGeneric<string>("PrivateStaticGenericMethod", genericParameters, 123);
+            Assert.AreEqual("PrivateStaticGenericMethod:" + typeof(int).ToString() + "123", result);
         }
 
         [Test]

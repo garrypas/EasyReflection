@@ -10,6 +10,8 @@ namespace System.Reflection
 {
     public static class TypeExtensions
     {
+        private static readonly Type[] NotGenericParameters = { };
+
         #region Properties (Groups)
         public static IEnumerable<PropertyInfo> GetPublicGetters(this Type t)
         {
@@ -315,12 +317,32 @@ namespace System.Reflection
         #region Static Methods (Functionality)
         public static T Invoke<T>(this Type t, string methodName, params object[] arguments)
         {
-            return (T)t.GetAnyStaticMethod(methodName).Invoke(null, arguments as object[]);
+            return InvokeGenericCommon<T>(t, methodName, NotGenericParameters, arguments);
         }
 
         public static void Invoke(this Type t, string methodName, params object[] arguments)
         {
-            Invoke<object>(t, methodName, arguments);
+            InvokeGenericCommon<object>(t, methodName, NotGenericParameters, arguments);
+        }
+
+        public static T InvokeGeneric<T>(this Type t, string methodName, IEnumerable<Type> genericParameters, params object[] arguments)
+        {
+            return InvokeGenericCommon<T>(t, methodName, genericParameters, arguments);
+        }
+
+        public static void InvokeGeneric(this Type t, string methodName, IEnumerable<Type> genericParameters, params object[] arguments)
+        {
+            InvokeGenericCommon<object>(t, methodName, genericParameters, arguments);
+        }
+
+        private static T InvokeGenericCommon<T>(this Type t, string methodName, IEnumerable<Type> genericParameters, params object[] arguments)
+        {
+            var methodInfo = t.GetAnyStaticMethod(methodName);
+            if(genericParameters != null && genericParameters.Any())
+            {
+                methodInfo = methodInfo.MakeGenericMethod(genericParameters.ToArray());
+            }
+            return (T)methodInfo.Invoke(null, arguments as object[]);
         }
         #endregion
 
