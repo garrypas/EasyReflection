@@ -2,6 +2,8 @@
 using NUnit.Framework;
 using System.Reflection;
 using System.Linq;
+using FluentAssertions;
+using System.Collections.Generic;
 
 namespace EasyReflectionTests
 {
@@ -13,7 +15,7 @@ namespace EasyReflectionTests
         [SetUp]
         public void SetUp()
         {
-            this.publicClassType = typeof(PublicClass);
+            this.publicClassType = typeof(TestClass);
         }
 
         #region Properties (Groups)
@@ -21,64 +23,64 @@ namespace EasyReflectionTests
         public void GetsPublicGetters()
         {
             var propertyInfo = this.publicClassType.GetPublicGetters();
-            Assert.AreEqual(1, propertyInfo.Count());
-            Assert.AreEqual("PublicProperty", propertyInfo.First().Name);
+            propertyInfo.GetNames().Should().Contain("PublicProperty").And.HaveCount(1);
         }
 
         [Test]
         public void GetsPrivateGetters()
         {
             var propertyInfo = this.publicClassType.GetPrivateGetters();
-            Assert.AreEqual(1, propertyInfo.Count());
-            Assert.AreEqual("PrivateProperty", propertyInfo.First().Name);
+            propertyInfo.GetNames().Should().Contain("PrivateProperty").And.HaveCount(1);
         }
 
         [Test]
         public void GetsInternalGetters()
         {
             var propertyInfo = this.publicClassType.GetInternalGetters();
-            Assert.AreEqual(1, propertyInfo.Count());
-            Assert.AreEqual("InternalProperty", propertyInfo.First().Name);
+            propertyInfo.GetNames().Should().Contain("InternalProperty").And.HaveCount(1);
         }
 
         [Test]
         public void GetsProtectedGetters()
         {
             var propertyInfo = this.publicClassType.GetProtectedGetters();
-            Assert.AreEqual(1, propertyInfo.Count());
-            Assert.AreEqual("ProtectedProperty", propertyInfo.First().Name);
+            propertyInfo.GetNames().Should().Contain("ProtectedProperty").And.HaveCount(1);
         }
 
         [Test]
         public void GetsPublicSetters()
         {
             var propertyInfo = this.publicClassType.GetPublicSetters();
-            Assert.AreEqual(1, propertyInfo.Count());
-            Assert.AreEqual("PublicProperty", propertyInfo.First().Name);
+            propertyInfo.GetNames().Should().Contain("PublicProperty").And.HaveCount(1);
         }
 
         [Test]
         public void GetsPrivateSetters()
         {
             var propertyInfo = this.publicClassType.GetPrivateSetters();
-            Assert.AreEqual(1, propertyInfo.Count());
-            Assert.AreEqual("PrivateProperty", propertyInfo.First().Name);
+            propertyInfo.GetNames().Should().Contain("PrivateProperty").And.HaveCount(1);
         }
 
         [Test]
         public void GetsInternalSetters()
         {
             var propertyInfo = this.publicClassType.GetInternalSetters();
-            Assert.AreEqual(1, propertyInfo.Count());
-            Assert.AreEqual("InternalProperty", propertyInfo.First().Name);
+            propertyInfo.GetNames().Should().Contain("InternalProperty").And.HaveCount(1);
         }
 
         [Test]
         public void GetsProtectedSetters()
         {
             var propertyInfo = this.publicClassType.GetProtectedSetters();
-            Assert.AreEqual(1, propertyInfo.Count());
-            Assert.AreEqual("ProtectedProperty", propertyInfo.First().Name);
+            propertyInfo.GetNames().Should().Contain("ProtectedProperty").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsGettersAndSetters()
+        {
+            var propertyInfo = this.publicClassType.GetGettersAndSetters();
+            var expectedProperties = new[] { "PublicProperty", "PrivateProperty", "InternalProperty", "ProtectedProperty" };
+            propertyInfo.Select(pi => pi.Name).Should().Contain(expectedProperties).And.HaveCount(expectedProperties.Count());
         }
         #endregion
 
@@ -145,32 +147,28 @@ namespace EasyReflectionTests
         public void GetsPublicFields()
         {
             var fieldInfo = this.publicClassType.GetPublicFields();
-            Assert.AreEqual(1, fieldInfo.Count());
-            Assert.AreEqual("publicField", fieldInfo.First().Name);
+            fieldInfo.GetNames().Should().Contain("publicField").And.HaveCount(1);
         }
 
         [Test]
         public void GetsPrivateFields()
         {
             var fieldInfo = this.publicClassType.GetPrivateFields();
-            Assert.AreEqual(1, fieldInfo.Count());
-            Assert.AreEqual("privateField", fieldInfo.First().Name);
+            fieldInfo.GetNames().Should().Contain("privateField").And.HaveCount(1);
         }
 
         [Test]
         public void GetsInternalFields()
         {
             var fieldInfo = this.publicClassType.GetInternalFields();
-            Assert.AreEqual(1, fieldInfo.Count());
-            Assert.AreEqual("internalField", fieldInfo.First().Name);
+            fieldInfo.GetNames().Should().Contain("internalField").And.HaveCount(1);
         }
 
         [Test]
         public void GetsProtectedFields()
         {
             var fieldInfo = this.publicClassType.GetProtectedFields();
-            Assert.AreEqual(1, fieldInfo.Count());
-            Assert.AreEqual("protectedField", fieldInfo.First().Name);
+            fieldInfo.GetNames().Should().Contain("protectedField").And.HaveCount(1);
         }
         #endregion
 
@@ -203,6 +201,282 @@ namespace EasyReflectionTests
             Assert.AreEqual("protectedField", fieldInfo.Name);
         }
 
+        #endregion
+
+        #region Methods (Groups)
+        [Test]
+        public void GetsPublicMethods()
+        {
+            var expectedMethods = new[] { "GetType", "ToString", "GetHashCode", "Equals", "PublicMethod" };
+            var methodInfo = this.publicClassType.GetPublicMethods();
+            methodInfo.GetNames().Should().BeEquivalentTo(expectedMethods).And.HaveSameCount(expectedMethods);
+        }
+
+        [Test]
+        public void GetsPrivateMethods()
+        {
+            var methodInfo = this.publicClassType.GetPrivateMethods();
+            methodInfo.GetNames().Should().Contain("PrivateMethod").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalMethods()
+        {
+            var methodInfo = this.publicClassType.GetInternalMethods();
+            methodInfo.GetNames().Should().Contain("InternalMethod").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedMethods()
+        {
+            var methodInfo = this.publicClassType.GetProtectedMethods();
+            methodInfo.GetNames().Should().Contain("ProtectedMethod").And.HaveCount(1);
+        }
+        #endregion
+
+        #region Methods (Individual)
+        [Test]
+        public void GetsPublicMethod()
+        {
+            var methodInfo = this.publicClassType.GetPublicMethod("PublicMethod");
+            Assert.AreEqual("PublicMethod", methodInfo.Name);
+        }
+
+        [Test]
+        public void GetsPrivateMethod()
+        {
+            var methodInfo = this.publicClassType.GetPrivateMethod("PrivateMethod");
+            Assert.AreEqual("PrivateMethod", methodInfo.Name);
+        }
+
+        [Test]
+        public void GetsInternalMethod()
+        {
+            var methodInfo = this.publicClassType.GetInternalMethod("InternalMethod");
+            Assert.AreEqual("InternalMethod", methodInfo.Name);
+        }
+
+        [Test]
+        public void GetsProtectedMethod()
+        {
+            var methodInfo = this.publicClassType.GetProtectedMethod("ProtectedMethod");
+            Assert.AreEqual("ProtectedMethod", methodInfo.Name);
+        }
+        #endregion
+
+        #region Static Methods (Groups)
+        [Test]
+        public void GetsPublicStaticMethods()
+        {
+            var StaticMethodInfo = this.publicClassType.GetPublicStaticMethods();
+            StaticMethodInfo.GetNames().Should().Contain("PublicStaticMethod").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPrivateStaticMethods()
+        {
+            var StaticMethodInfo = this.publicClassType.GetPrivateStaticMethods();
+            StaticMethodInfo.GetNames().Should().Contain("PrivateStaticMethod").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalStaticMethods()
+        {
+            var StaticMethodInfo = this.publicClassType.GetInternalStaticMethods();
+            StaticMethodInfo.GetNames().Should().Contain("InternalStaticMethod").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedStaticMethods()
+        {
+            var StaticMethodInfo = this.publicClassType.GetProtectedStaticMethods();
+            StaticMethodInfo.GetNames().Should().Contain("ProtectedStaticMethod").And.HaveCount(1);
+        }
+        #endregion
+
+        #region Static Methods (Individual)
+        [Test]
+        public void GetsPublicStaticMethod()
+        {
+            var StaticMethodInfo = this.publicClassType.GetPublicStaticMethod("PublicStaticMethod");
+            Assert.AreEqual("PublicStaticMethod", StaticMethodInfo.Name);
+        }
+
+        [Test]
+        public void GetsPrivateStaticMethod()
+        {
+            var StaticMethodInfo = this.publicClassType.GetPrivateStaticMethod("PrivateStaticMethod");
+            Assert.AreEqual("PrivateStaticMethod", StaticMethodInfo.Name);
+        }
+
+        [Test]
+        public void GetsInternalStaticMethod()
+        {
+            var StaticMethodInfo = this.publicClassType.GetInternalStaticMethod("InternalStaticMethod");
+            Assert.AreEqual("InternalStaticMethod", StaticMethodInfo.Name);
+        }
+
+        [Test]
+        public void GetsProtectedStaticMethod()
+        {
+            var StaticMethodInfo = this.publicClassType.GetProtectedStaticMethod("ProtectedStaticMethod");
+            Assert.AreEqual("ProtectedStaticMethod", StaticMethodInfo.Name);
+        }
+        #endregion
+
+        #region Static Methods (Functionality)
+        [Test]
+        public void InvokesStaticMethod()
+        {
+            var inst = new TestClass();
+            int result = typeof(TestClass).Invoke<int>("PrivateStaticMethod", 1, 2);
+            Assert.AreEqual(3, result);
+        }
+
+        [Test]
+        public void ArgumentStaticPassedByReference()
+        {
+            var assignTo = new List<string>();
+            var expectedList = new[] { "newItemForStatic" };
+            typeof(TestClass).Invoke("ProtectedStaticMethod", assignTo);
+            assignTo.Should().BeEquivalentTo(expectedList).And.HaveSameCount(expectedList);
+        }
+        #endregion 
+
+        #region Attributes
+        #region Properties (Groups)
+        [Test]
+        public void GetsPublicGetterAttributes()
+        {
+            typeof(TestClass).GetPublicGetterAttributes<TestAttributeA>().Select(pair => pair.PropertyInfo)
+                .GetNames()
+                .Should()
+                .Contain("PublicProperty")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPrivateGetterAttributes()
+        {
+            typeof(TestClass).GetPrivateGetterAttributes<TestAttributeA>()
+                .Should()
+                .Contain(pair => pair.PropertyInfo.Name == "PrivateProperty")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalGetterAttributes()
+        {
+            typeof(TestClass).GetInternalGetterAttributes<TestAttributeB>()
+                .Should()
+                .Contain(pair => pair.PropertyInfo.Name == "InternalProperty")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedGetterAttributes()
+        {
+            typeof(TestClass).GetProtectedGetterAttributes<TestAttributeA>()
+                .Should()
+                .Contain(pair => pair.PropertyInfo.Name == "ProtectedProperty")
+                .And.Contain(pair => pair.Attributes.Count() == 2)
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPublicSetterAttributes()
+        {
+            typeof(TestClass).GetPublicSetterAttributes<TestAttributeA>()
+                .Select(pair => pair.PropertyInfo)
+                .GetNames()
+                .Should()
+                .Contain("PublicProperty")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPrivateSetterAttributes()
+        {
+            typeof(TestClass).GetPrivateSetterAttributes<TestAttributeA>()
+                .Should()
+                .Contain(pair => pair.PropertyInfo.Name == "PrivateProperty")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalSetterAttributes()
+        {
+            typeof(TestClass).GetInternalSetterAttributes<TestAttributeB>()
+                .Should()
+                .Contain(pair => pair.PropertyInfo.Name == "InternalProperty")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedSetterAttributes()
+        {
+            typeof(TestClass).GetProtectedSetterAttributes<TestAttributeA>()
+                .Should()
+                .Contain(pair => pair.PropertyInfo.Name == "ProtectedProperty")
+                .And.Contain(pair => pair.Attributes.Count() == 2)
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsAttributes()
+        {
+            var expectedNames = new [] { "PublicProperty", "PrivateProperty", "ProtectedProperty" };
+            var propertyInfoAttributes = typeof(TestClass).GetAttributes<TestAttributeA>()
+                .Select(pair => pair.PropertyInfo)
+                .GetNames()
+                .Should()
+                .BeEquivalentTo(expectedNames)
+                .And.HaveSameCount(expectedNames);
+        }
+        #endregion
+        
+        #region Properties (Individual)
+        [Test]
+        public void GetsPublicGetterAttribute()
+        {
+            typeof(TestClass).GetPublicGetterAttributes<TestAttributeA>("PublicProperty")
+                .Should()
+                .HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPrivateGetterAttribute()
+        {
+            typeof(TestClass).GetPrivateGetterAttributes<TestAttributeA>("PrivateProperty")
+                .Should()
+                .HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalGetterAttribute()
+        {
+            typeof(TestClass).GetInternalGetterAttributes<TestAttributeB>("InternalProperty")
+                .Should()
+                .HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedGetterAttribute()
+        {
+            typeof(TestClass).GetProtectedGetterAttributes<TestAttributeA>("ProtectedProperty")
+                .Should()
+                .HaveCount(2);
+        }
+
+        [Test]
+        public void GetsAttribute()
+        {
+            typeof(TestClass).GetAttributes<TestAttributeA>("PrivateProperty")
+                .Should()
+                .OnlyContain(a => a.GetType() == typeof(TestAttributeA))
+                .And.HaveCount(1);
+        }
+        #endregion        
         #endregion
     }
 }
