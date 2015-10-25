@@ -84,5 +84,28 @@ namespace EasyReflectionTests
         }
     
         #endregion
+
+        #region Attributes
+        [Test]
+        public void GetsAttributes()
+        {
+            var expectedNames = new[] { "PublicProperty", "PrivateProperty", "ProtectedProperty" };
+            var propertyInfoAttributes = new TestClass().GetAttributes<TestAttributeA>()
+                .Select(pair => pair.PropertyInfo)
+                .GetNames()
+                .Should()
+                .BeEquivalentTo(expectedNames)
+                .And.HaveSameCount(expectedNames);
+        }
+
+        [Test]
+        public void GetsAttribute()
+        {
+            new TestClass().GetAttribute<TestAttributeA>("PrivateProperty")
+                .Should()
+                .OnlyContain(a => a.GetType() == typeof(TestAttributeA))
+                .And.HaveCount(1);
+        }
+        #endregion
     }
 }

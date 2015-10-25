@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using EasyReflection;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace System.Reflection
 {
+    using ReflectionTypeExtensions = System.Reflection.TypeExtensions;
     public static class ObjectExtensions
     {
         private static readonly Type[] NotGenericParameters = { };
@@ -54,6 +56,18 @@ namespace System.Reflection
                 methodInfo = methodInfo.MakeGenericMethod(genericParameters.ToArray());
             }
             return (T)methodInfo.Invoke(obj, arguments as object[]);
+        }
+
+        public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetAttributes<TAttribute>(this object obj)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(obj.GetType());
+        }
+
+        public static IEnumerable<TAttribute> GetAttribute<TAttribute>(this object obj, string propertyName)
+            where TAttribute : Attribute
+        {
+            return obj.GetType().GetAttribute<TAttribute>(propertyName);
         }
     }
 }

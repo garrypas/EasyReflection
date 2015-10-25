@@ -215,7 +215,7 @@ namespace System.Reflection
         #endregion
 
         #region Properties (Individual)
-        public static IEnumerable<TAttribute> GetAttributes<TAttribute>(this Type t, string propertyName)
+        public static IEnumerable<TAttribute> GetAttribute<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
             return GetAttributesWithPredicate<TAttribute>(t, propertyName);

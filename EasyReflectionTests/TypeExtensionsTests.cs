@@ -676,7 +676,7 @@ namespace EasyReflectionTests
         [Test]
         public void GetsAttribute()
         {
-            typeof(TestClass).GetAttributes<TestAttributeA>("PrivateProperty")
+            typeof(TestClass).GetAttribute<TestAttributeA>("PrivateProperty")
                 .Should()
                 .OnlyContain(a => a.GetType() == typeof(TestAttributeA))
                 .And.HaveCount(1);
