@@ -1,1 +1,3 @@
 version: 1.0.{build}
+after_build:
+- nuget pack EasyReflection\EasyReflection.nuspec -Version %appveyor_build_version%
