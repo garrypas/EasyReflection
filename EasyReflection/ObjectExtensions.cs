@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace System.Reflection
+namespace System
 {
-    using ReflectionTypeExtensions = System.Reflection.TypeExtensions;
+    using ReflectionTypeExtensions = System.TypeExtensions;
     public static class ObjectExtensions
     {
         private static readonly Type[] NotGenericParameters = { };

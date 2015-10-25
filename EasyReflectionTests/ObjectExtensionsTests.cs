@@ -11,7 +11,7 @@ namespace EasyReflectionTests
     [TestFixture]
     public class ObjectExtensionsTests
     {
-        private Type type;
+        private System.Type type;
 
         [SetUp]
         public void SetUp()

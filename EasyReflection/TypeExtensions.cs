@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace System.Reflection
+namespace System
 {
     public static class TypeExtensions
     {
@@ -234,7 +234,7 @@ namespace System.Reflection
 
 namespace EasyReflection
 {
-    using ReflectionTypeExtensions = System.Reflection.TypeExtensions;
+    using ReflectionTypeExtensions = System.TypeExtensions;
 
     public static class TypeExtensions
     {
@@ -687,6 +687,5 @@ namespace EasyReflection
         }
         #endregion
         #endregion
-
     }
 }
