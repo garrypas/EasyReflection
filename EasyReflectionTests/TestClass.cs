@@ -95,5 +95,21 @@ namespace EasyReflectionTests
         {
             return "PrivateStaticGenericMethod:" + typeof(T).ToString() + number;
         }
+
+        public static string PublicStaticProperty { get; set; }
+
+        internal static string InternalStaticProperty { get; set; }
+
+        private static string PrivateStaticProperty { get; set; }
+
+        protected static string ProtectedStaticProperty { get; set; }
+
+        public static string publicStaticField;
+
+        internal static string internalStaticField;
+
+        private static string privateStaticField;
+
+        protected static string protectedStaticField;
     }
 }

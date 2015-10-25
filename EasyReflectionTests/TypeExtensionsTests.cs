@@ -142,6 +142,137 @@ namespace EasyReflectionTests
         }
         #endregion
 
+        #region Static Properties (Groups)
+        [Test]
+        public void GetsPublicStaticGetters()
+        {
+            var propertyInfo = this.publicClassType.GetPublicStaticGetters();
+            propertyInfo.GetNames().Should().Contain("PublicStaticProperty").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPrivateStaticGetters()
+        {
+            var propertyInfo = this.publicClassType.GetPrivateStaticGetters();
+            propertyInfo.GetNames().Should().Contain("PrivateStaticProperty").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalStaticGetters()
+        {
+            var propertyInfo = this.publicClassType.GetInternalStaticGetters();
+            propertyInfo.GetNames().Should().Contain("InternalStaticProperty").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedStaticGetters()
+        {
+            var propertyInfo = this.publicClassType.GetProtectedStaticGetters();
+            propertyInfo.GetNames().Should().Contain("ProtectedStaticProperty").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPublicStaticSetters()
+        {
+            var propertyInfo = this.publicClassType.GetPublicStaticSetters();
+            propertyInfo.GetNames().Should().Contain("PublicStaticProperty").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPrivateStaticSetters()
+        {
+            var propertyInfo = this.publicClassType.GetPrivateStaticSetters();
+            propertyInfo.GetNames().Should().Contain("PrivateStaticProperty").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalStaticSetters()
+        {
+            var propertyInfo = this.publicClassType.GetInternalStaticSetters();
+            propertyInfo.GetNames().Should().Contain("InternalStaticProperty").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedStaticSetters()
+        {
+            var propertyInfo = this.publicClassType.GetProtectedStaticSetters();
+            propertyInfo.GetNames().Should().Contain("ProtectedStaticProperty").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsStaticGettersAndSetters()
+        {
+            var propertyInfo = this.publicClassType.GetStaticGettersAndSetters();
+            var expectedProperties = new[] { "PublicStaticProperty", "PrivateStaticProperty", "InternalStaticProperty", "ProtectedStaticProperty" };
+            propertyInfo.Select(pi => pi.Name).Should().Contain(expectedProperties).And.HaveCount(expectedProperties.Count());
+        }
+        #endregion
+
+        #region Static Properties (Individual)
+        [Test]
+        public void GetsPublicStaticGetter()
+        {
+            var propertyInfo = this.publicClassType.GetPublicStaticGetter("PublicStaticProperty");
+            Assert.AreEqual("PublicStaticProperty", propertyInfo.Name);
+        }
+
+        [Test]
+        public void GetsPrivateStaticGetter()
+        {
+            var propertyInfo = this.publicClassType.GetPrivateStaticGetter("PrivateStaticProperty");
+            Assert.AreEqual("PrivateStaticProperty", propertyInfo.Name);
+        }
+
+        [Test]
+        public void GetsInternalStaticGetter()
+        {
+            var propertyInfo = this.publicClassType.GetInternalStaticGetter("InternalStaticProperty");
+            Assert.AreEqual("InternalStaticProperty", propertyInfo.Name);
+        }
+
+        [Test]
+        public void GetsProtectedStaticGetter()
+        {
+            var propertyInfo = this.publicClassType.GetProtectedStaticGetter("ProtectedStaticProperty");
+            Assert.AreEqual("ProtectedStaticProperty", propertyInfo.Name);
+        }
+
+        [Test]
+        public void GetsPublicStaticSetter()
+        {
+            var propertyInfo = this.publicClassType.GetPublicStaticSetter("PublicStaticProperty");
+            Assert.AreEqual("PublicStaticProperty", propertyInfo.Name);
+        }
+
+        [Test]
+        public void GetsPrivateStaticSetter()
+        {
+            var propertyInfo = this.publicClassType.GetPrivateStaticSetter("PrivateStaticProperty");
+            Assert.AreEqual("PrivateStaticProperty", propertyInfo.Name);
+        }
+
+        [Test]
+        public void GetsInternalStaticSetter()
+        {
+            var propertyInfo = this.publicClassType.GetInternalStaticSetter("InternalStaticProperty");
+            Assert.AreEqual("InternalStaticProperty", propertyInfo.Name);
+        }
+
+        [Test]
+        public void GetsProtectedStaticSetter()
+        {
+            var propertyInfo = this.publicClassType.GetProtectedStaticSetter("ProtectedStaticProperty");
+            Assert.AreEqual("ProtectedStaticProperty", propertyInfo.Name);
+        }
+
+        [Test]
+        public void GetsAnyStaticProperty()
+        {
+            var propertyInfo = this.publicClassType.GetAnyStaticProperty("PrivateStaticProperty");
+            Assert.AreEqual("PrivateStaticProperty", propertyInfo.Name);
+        }
+        #endregion
+
         #region Fields (Groups)
         [Test]
         public void GetsPublicFields()
@@ -201,6 +332,66 @@ namespace EasyReflectionTests
             Assert.AreEqual("protectedField", fieldInfo.Name);
         }
 
+        #endregion
+
+        #region Static Fields (Groups)
+        [Test]
+        public void GetsPublicStaticFields()
+        {
+            var fieldInfo = this.publicClassType.GetPublicStaticFields();
+            fieldInfo.GetNames().Should().Contain("publicStaticField").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPrivateStaticFields()
+        {
+            var fieldInfo = this.publicClassType.GetPrivateStaticFields();
+            fieldInfo.GetNames().Should().Contain("privateStaticField").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalStaticFields()
+        {
+            var fieldInfo = this.publicClassType.GetInternalStaticFields();
+            fieldInfo.GetNames().Should().Contain("internalStaticField").And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedStaticFields()
+        {
+            var fieldInfo = this.publicClassType.GetProtectedStaticFields();
+            fieldInfo.GetNames().Should().Contain("protectedStaticField").And.HaveCount(1);
+        }
+        #endregion
+
+        #region Static Fields (Individual)
+        [Test]
+        public void GetsPublicStaticField()
+        {
+            var fieldInfo = this.publicClassType.GetPublicStaticField("publicStaticField");
+            Assert.AreEqual("publicStaticField", fieldInfo.Name);
+        }
+
+        [Test]
+        public void GetsPrivateStaticField()
+        {
+            var fieldInfo = this.publicClassType.GetPrivateStaticField("privateStaticField");
+            Assert.AreEqual("privateStaticField", fieldInfo.Name);
+        }
+
+        [Test]
+        public void GetsInternalStaticField()
+        {
+            var fieldInfo = this.publicClassType.GetInternalStaticField("internalStaticField");
+            Assert.AreEqual("internalStaticField", fieldInfo.Name);
+        }
+
+        [Test]
+        public void GetsProtectedStaticField()
+        {
+            var fieldInfo = this.publicClassType.GetProtectedStaticField("protectedStaticField");
+            Assert.AreEqual("protectedStaticField", fieldInfo.Name);
+        }
         #endregion
 
         #region Methods (Groups)

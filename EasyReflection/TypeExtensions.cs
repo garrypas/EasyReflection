@@ -116,6 +116,110 @@ namespace System.Reflection
         }
         #endregion
 
+        #region Static Properties (Groups)
+        public static IEnumerable<PropertyInfo> GetPublicStaticGetters(this Type t)
+        {
+            return GetStaticGettersAndStaticSetters(t, p => p.GetGetMethod(true).IsPublic);
+        }
+
+        public static IEnumerable<PropertyInfo> GetPublicStaticSetters(this Type t)
+        {
+            return GetStaticGettersAndStaticSetters(t, p => p.GetSetMethod(true).IsPublic);
+        }
+
+        public static IEnumerable<PropertyInfo> GetPrivateStaticGetters(this Type t)
+        {
+            return GetStaticGettersAndStaticSetters(t, p => p.GetGetMethod(true).IsPrivate);
+        }
+
+        public static IEnumerable<PropertyInfo> GetPrivateStaticSetters(this Type t)
+        {
+            return GetStaticGettersAndStaticSetters(t, p => p.GetSetMethod(true).IsPrivate);
+        }
+
+        public static IEnumerable<PropertyInfo> GetInternalStaticGetters(this Type t)
+        {
+            return GetStaticGettersAndStaticSetters(t, p => p.GetGetMethod(true).IsAssembly);
+        }
+
+        public static IEnumerable<PropertyInfo> GetInternalStaticSetters(this Type t)
+        {
+            return GetStaticGettersAndStaticSetters(t, p => p.GetSetMethod(true).IsAssembly);
+        }
+
+        public static IEnumerable<PropertyInfo> GetProtectedStaticGetters(this Type t)
+        {
+            return GetStaticGettersAndStaticSetters(t, p => p.GetGetMethod(true).IsFamily);
+        }
+
+        public static IEnumerable<PropertyInfo> GetProtectedStaticSetters(this Type t)
+        {
+            return GetStaticGettersAndStaticSetters(t, p => p.GetSetMethod(true).IsFamily);
+        }
+
+        public static IEnumerable<PropertyInfo> GetStaticGettersAndSetters(this Type t)
+        {
+            return t.GetProperties(BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public);
+        }
+
+        private static IEnumerable<PropertyInfo> GetStaticGettersAndStaticSetters(Type t, Func<PropertyInfo, bool> whereClause)
+        {
+            return GetStaticGettersAndSetters(t).Where(whereClause);
+        }
+        #endregion
+
+        #region Static Properties (Individual)
+        public static PropertyInfo GetPublicStaticGetter(this Type t, string propertyName)
+        {
+            return GetStaticGetterSetter(t.GetPublicStaticGetters(), propertyName);
+        }
+
+        public static PropertyInfo GetPublicStaticSetter(this Type t, string propertyName)
+        {
+            return GetStaticGetterSetter(t.GetPublicStaticSetters(), propertyName);
+        }
+
+        public static PropertyInfo GetPrivateStaticGetter(this Type t, string propertyName)
+        {
+            return GetStaticGetterSetter(t.GetPrivateStaticGetters(), propertyName);
+        }
+
+        public static PropertyInfo GetPrivateStaticSetter(this Type t, string propertyName)
+        {
+            return GetStaticGetterSetter(t.GetPrivateStaticSetters(), propertyName);
+        }
+
+        public static PropertyInfo GetInternalStaticGetter(this Type t, string propertyName)
+        {
+            return GetStaticGetterSetter(t.GetInternalStaticGetters(), propertyName);
+        }
+
+        public static PropertyInfo GetInternalStaticSetter(this Type t, string propertyName)
+        {
+            return GetStaticGetterSetter(t.GetInternalStaticSetters(), propertyName);
+        }
+
+        public static PropertyInfo GetProtectedStaticGetter(this Type t, string propertyName)
+        {
+            return GetStaticGetterSetter(t.GetProtectedStaticGetters(), propertyName);
+        }
+
+        public static PropertyInfo GetProtectedStaticSetter(this Type t, string propertyName)
+        {
+            return GetStaticGetterSetter(t.GetProtectedStaticSetters(), propertyName);
+        }
+
+        public static PropertyInfo GetAnyStaticProperty(this Type t, string propertyName)
+        {
+            return GetStaticGetterSetter(GetStaticGettersAndSetters(t), propertyName);
+        }
+
+        private static PropertyInfo GetStaticGetterSetter(IEnumerable<PropertyInfo> propertyInfo, string propertyName)
+        {
+            return propertyInfo.FirstOrDefault(p => p.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase));
+        }
+        #endregion
+
         #region Fields (Groups)
         public static IEnumerable<FieldInfo> GetPublicFields(this Type t)
         {
@@ -179,6 +283,72 @@ namespace System.Reflection
         private static FieldInfo GetAnyField(IEnumerable<FieldInfo> fieldInfo, string fieldName)
         {
             return fieldInfo.First(f => f.Name.Equals(fieldName, StringComparison.InvariantCultureIgnoreCase));
+        }
+        #endregion
+
+        #region Static Fields (Groups)
+        public static IEnumerable<FieldInfo> GetPublicStaticFields(this Type t)
+        {
+            return GetAllStaticFields(t, fieldInfo => fieldInfo.IsPublic);
+        }
+
+        public static IEnumerable<FieldInfo> GetPrivateStaticFields(this Type t)
+        {
+            return GetAllStaticFields(t, fieldInfo => fieldInfo.IsPrivate);
+        }
+
+        public static IEnumerable<FieldInfo> GetInternalStaticFields(this Type t)
+        {
+            return GetAllStaticFields(t, fieldInfo => fieldInfo.IsAssembly);
+        }
+
+        public static IEnumerable<FieldInfo> GetProtectedStaticFields(this Type t)
+        {
+            return GetAllStaticFields(t, fieldInfo => fieldInfo.IsFamily);
+        }
+
+        public static IEnumerable<FieldInfo> GetAllStaticFields(this Type t)
+        {
+            var StaticFields = t.GetFields(BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public);
+            var StaticFieldsWithoutPropertyBackingStaticFields = StaticFields.Where(f => f.Name.StartsWith("<") == false && f.Name.EndsWith("k__BackingField") == false);
+            return StaticFieldsWithoutPropertyBackingStaticFields;
+        }
+
+        private static IEnumerable<FieldInfo> GetAllStaticFields(Type t, Func<FieldInfo, bool> whereClause)
+        {
+            return GetAllStaticFields(t).Where(whereClause);
+        }
+        #endregion
+
+        #region Static Fields (Individual)
+        public static FieldInfo GetPublicStaticField(this Type t, string StaticFieldName)
+        {
+            return GetAnyStaticField(t.GetPublicStaticFields(), StaticFieldName);
+        }
+
+        public static FieldInfo GetPrivateStaticField(this Type t, string StaticFieldName)
+        {
+            return GetAnyStaticField(t.GetPrivateStaticFields(), StaticFieldName);
+        }
+
+        public static FieldInfo GetInternalStaticField(this Type t, string StaticFieldName)
+        {
+            return GetAnyStaticField(t.GetInternalStaticFields(), StaticFieldName);
+        }
+
+        public static FieldInfo GetProtectedStaticField(this Type t, string StaticFieldName)
+        {
+            return GetAnyStaticField(t.GetProtectedStaticFields(), StaticFieldName);
+        }
+
+        public static FieldInfo GetAnyStaticField(this Type t, string StaticFieldName)
+        {
+            return GetAnyStaticField(GetAllStaticFields(t), StaticFieldName);
+        }
+
+        private static FieldInfo GetAnyStaticField(IEnumerable<FieldInfo> StaticFieldInfo, string StaticFieldName)
+        {
+            return StaticFieldInfo.First(f => f.Name.Equals(StaticFieldName, StringComparison.InvariantCultureIgnoreCase));
         }
         #endregion
 
@@ -476,5 +646,6 @@ namespace System.Reflection
         }
         #endregion
         #endregion
+
     }
 }
