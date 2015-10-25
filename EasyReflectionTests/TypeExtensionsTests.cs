@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Linq;
 using FluentAssertions;
 using System.Collections.Generic;
+using EasyReflection;
 
 namespace EasyReflectionTests
 {

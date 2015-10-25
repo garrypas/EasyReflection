@@ -9,7 +9,7 @@ namespace System.Reflection
 
         public static void SetValue(this object obj, string memberName, object value, params object[] indexer)
         {
-            var property = obj.GetType().GetAnyProperty(memberName);
+            var property = obj.GetType().GetGetterSetter(memberName);
             if (property != null)
             {
                 property.SetValue(obj, value, indexer);
@@ -23,7 +23,7 @@ namespace System.Reflection
 
         public static T GetValue<T>(this object obj, string memberName, params object[] indexer)
         {
-            return (T)obj.GetType().GetAnyProperty(memberName).GetValue(obj, indexer as object[]);
+            return (T)obj.GetType().GetGetterSetter(memberName).GetValue(obj, indexer as object[]);
         }
 
         public static T Invoke<T>(this object obj, string methodName, params object[] arguments)

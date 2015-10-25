@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
 using FluentAssertions;
+using EasyReflection;
 
 namespace EasyReflectionTests
 {
@@ -24,7 +25,7 @@ namespace EasyReflectionTests
         {
             var inst = new TestClass();
             inst.SetValue("PublicProperty", "hello world");
-            Assert.AreEqual("hello world", type.GetAnyProperty("PublicProperty").GetValue(inst, null));
+            Assert.AreEqual("hello world", type.GetGetterSetter("PublicProperty").GetValue(inst, null));
         }
 
         [Test]
@@ -32,7 +33,7 @@ namespace EasyReflectionTests
         {
             var inst = new TestClass();
             inst.SetValue("PrivateProperty", "hello world");
-            Assert.AreEqual("hello world", type.GetAnyProperty("PrivateProperty").GetValue(inst, null));
+            Assert.AreEqual("hello world", type.GetGetterSetter("PrivateProperty").GetValue(inst, null));
         }
 
         [Test]
