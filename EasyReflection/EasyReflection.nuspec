@@ -6,7 +6,6 @@
     <title>Easy Reflection</title>
     <authors>Garry Passarella</authors>
     <owners>Garry Passarella</owners>
-    <licenseUrl>MIT</licenseUrl>
     <projectUrl>https://github.com/garrypas/EasyReflection</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Library encapsulating common reflection tasks</description>
