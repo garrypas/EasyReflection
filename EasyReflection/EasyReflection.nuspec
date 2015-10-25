@@ -13,4 +13,8 @@
     <copyright>Copyright 2015</copyright>
     <tags>Reflection</tags>
   </metadata>
+  <files>
+    <file src="bin\Debug\*.dll" target="lib" />
+    <file src="bin\Release\*.dll" target="lib" />
+  </files>
 </package>
