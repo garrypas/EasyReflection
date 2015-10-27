@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using EasyReflection;
 using System.Linq;
-using System.Text;
 
-namespace EasyReflection
+namespace System.Collections.Generic
 {
     public static class IDictionaryExtensions
     {
