@@ -113,12 +113,12 @@ namespace System
         #endregion
 
         #region Methods (Groups)
-        public static IEnumerable<MethodInfo> GetAllMethods(Type t)
+        public static IEnumerable<MethodInfo> GetAllMethods(this Type t)
         {
             return t.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
         }
 
-        internal static IEnumerable<MethodInfo> GetAllMethods(Type t, Func<MethodInfo, bool> whereClause)
+        internal static IEnumerable<MethodInfo> GetAllMethods(this Type t, Func<MethodInfo, bool> whereClause)
         {
             return GetAllMethods(t).Where(whereClause).Where(methodInfo => methodInfo.Name.StartsWith("get_") == false
                 && methodInfo.Name.StartsWith("set_") == false);
@@ -196,7 +196,7 @@ namespace System
 
         #region Attributes
         #region Properties (Groups)
-        public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetAttributes<TAttribute>(this Type t)
+        public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetPropertyAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
             return GetPropertyInfoAttributesWithPredicate<TAttribute>(t);
@@ -215,18 +215,85 @@ namespace System
         #endregion
 
         #region Properties (Individual)
-        public static IEnumerable<TAttribute> GetAttribute<TAttribute>(this Type t, string propertyName)
+        public static IEnumerable<TAttribute> GetPropertyAttribute<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return GetAttributesWithPredicate<TAttribute>(t, propertyName);
+            return GetPropertyAttributesWithPredicate<TAttribute>(t, propertyName);
         }
 
-        internal static IEnumerable<TAttribute> GetAttributesWithPredicate<TAttribute>(this Type t, string propertyName, Func<PropertyInfoAttributePair<TAttribute>, bool> predicate = null)
+        internal static IEnumerable<TAttribute> GetPropertyAttributesWithPredicate<TAttribute>(this Type t, string propertyName, Func<PropertyInfoAttributePair<TAttribute>, bool> predicate = null)
             where TAttribute : Attribute
         {
-            return GetPropertyInfoAttributesWithPredicate<TAttribute>(t, predicate).First(pair => pair.PropertyInfo.Name == propertyName).Attributes;
+            return GetPropertyInfoAttributesWithPredicate<TAttribute>(t, predicate).First(pair => pair.MemberInfo.Name == propertyName).Attributes;
         }
         #endregion
+
+        #region Fields (Groups)
+        public static IEnumerable<FieldInfoAttributePair<TAttribute>> GetFieldAttributes<TAttribute>(this Type t)
+            where TAttribute : Attribute
+        {
+            return GetFieldInfoAttributesWithPredicate<TAttribute>(t);
+        }
+
+        internal static IEnumerable<FieldInfoAttributePair<TAttribute>> GetFieldInfoAttributesWithPredicate<TAttribute>(this Type t, Func<FieldInfoAttributePair<TAttribute>, bool> predicate = null)
+            where TAttribute : Attribute
+        {
+            var fieldAttributePairs = t.GetAllFields().Select(pi => new FieldInfoAttributePair<TAttribute>(pi, pi.GetCustomAttributes(typeof(TAttribute), true).Select(attr => attr as TAttribute))).Where(pair => pair.Attributes.Any());
+            if (predicate != null)
+            {
+                fieldAttributePairs = fieldAttributePairs.Where(predicate);
+            }
+            return fieldAttributePairs;
+        }
+        #endregion
+
+        #region Fields (Individual)
+        public static IEnumerable<TAttribute> GetFieldAttribute<TAttribute>(this Type t, string fieldName)
+            where TAttribute : Attribute
+        {
+            return GetFieldAttributesWithPredicate<TAttribute>(t, fieldName);
+        }
+
+        internal static IEnumerable<TAttribute> GetFieldAttributesWithPredicate<TAttribute>(this Type t, string fieldName, Func<FieldInfoAttributePair<TAttribute>, bool> predicate = null)
+            where TAttribute : Attribute
+        {
+            return GetFieldInfoAttributesWithPredicate<TAttribute>(t, predicate).First(pair => pair.MemberInfo.Name == fieldName).Attributes;
+        }
+        #endregion
+
+        #region Methods (Groups)
+        public static IEnumerable<MethodInfoAttributePair<TAttribute>> GetMethodAttributes<TAttribute>(this Type t)
+            where TAttribute : Attribute
+        {
+            return GetMethodInfoAttributesWithPredicate<TAttribute>(t);
+        }
+
+        internal static IEnumerable<MethodInfoAttributePair<TAttribute>> GetMethodInfoAttributesWithPredicate<TAttribute>(this Type t, Func<MethodInfoAttributePair<TAttribute>, bool> predicate = null)
+            where TAttribute : Attribute
+        {
+            var methodAttributePairs = t.GetAllMethods().Select(pi => new MethodInfoAttributePair<TAttribute>(pi, pi.GetCustomAttributes(typeof(TAttribute), true).Select(attr => attr as TAttribute))).Where(pair => pair.Attributes.Any());
+            if (predicate != null)
+            {
+                methodAttributePairs = methodAttributePairs.Where(predicate);
+            }
+            return methodAttributePairs;
+        }
+        #endregion
+
+        #region Methods (Individual)
+        public static IEnumerable<TAttribute> GetMethodAttribute<TAttribute>(this Type t, string methodName)
+            where TAttribute : Attribute
+        {
+            return GetMethodAttributesWithPredicate<TAttribute>(t, methodName);
+        }
+
+        internal static IEnumerable<TAttribute> GetMethodAttributesWithPredicate<TAttribute>(this Type t, string methodName, Func<MethodInfoAttributePair<TAttribute>, bool> predicate = null)
+            where TAttribute : Attribute
+        {
+            return GetMethodInfoAttributesWithPredicate<TAttribute>(t, predicate).First(pair => pair.MemberInfo.Name == methodName).Attributes;
+        }
+        #endregion
+
         #endregion
 
     }
@@ -591,49 +658,49 @@ namespace EasyReflection
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetPublicGetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetGetMethod(true).IsPublic);
+            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.GetGetMethod(true).IsPublic);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetProtectedGetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetGetMethod(true).IsFamily);
+            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.GetGetMethod(true).IsFamily);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetInternalGetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetGetMethod(true).IsAssembly);
+            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.GetGetMethod(true).IsAssembly);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetPrivateGetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetGetMethod(true).IsPrivate);
+            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.GetGetMethod(true).IsPrivate);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetPublicSetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetSetMethod(true).IsPublic);
+            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.GetSetMethod(true).IsPublic);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetProtectedSetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetSetMethod(true).IsFamily);
+            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.GetSetMethod(true).IsFamily);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetInternalSetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetSetMethod(true).IsAssembly);
+            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.GetSetMethod(true).IsAssembly);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetPrivateSetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetSetMethod(true).IsPrivate);
+            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.GetSetMethod(true).IsPrivate);
         }
         #endregion
 
@@ -641,49 +708,153 @@ namespace EasyReflection
         public static IEnumerable<TAttribute> GetPublicGetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsPublic);
+            return ReflectionTypeExtensions.GetPropertyAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.MemberInfo.GetGetMethod(true).IsPublic);
         }
 
         public static IEnumerable<TAttribute> GetProtectedGetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsFamily);
+            return ReflectionTypeExtensions.GetPropertyAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.MemberInfo.GetGetMethod(true).IsFamily);
         }
 
         public static IEnumerable<TAttribute> GetInternalGetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsAssembly);
+            return ReflectionTypeExtensions.GetPropertyAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.MemberInfo.GetGetMethod(true).IsAssembly);
         }
 
         public static IEnumerable<TAttribute> GetPrivateGetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsPrivate);
+            return ReflectionTypeExtensions.GetPropertyAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.MemberInfo.GetGetMethod(true).IsPrivate);
         }
 
         public static IEnumerable<TAttribute> GetPublicSetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetSetMethod(true).IsPublic);
+            return ReflectionTypeExtensions.GetPropertyAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.MemberInfo.GetSetMethod(true).IsPublic);
         }
 
         public static IEnumerable<TAttribute> GetProtectedSetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetSetMethod(true).IsFamily);
+            return ReflectionTypeExtensions.GetPropertyAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.MemberInfo.GetSetMethod(true).IsFamily);
         }
 
         public static IEnumerable<TAttribute> GetInternalSetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetSetMethod(true).IsAssembly);
+            return ReflectionTypeExtensions.GetPropertyAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.MemberInfo.GetSetMethod(true).IsAssembly);
         }
 
         public static IEnumerable<TAttribute> GetPrivateSetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName);
+            return ReflectionTypeExtensions.GetPropertyAttributesWithPredicate<TAttribute>(t, propertyName);
+        }
+        #endregion
+
+        #region Fields (Groups)
+        public static IEnumerable<FieldInfoAttributePair<TAttribute>> GetPublicFieldAttributes<TAttribute>(this Type t)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetFieldInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.IsPublic);
+        }
+
+        public static IEnumerable<FieldInfoAttributePair<TAttribute>> GetProtectedFieldAttributes<TAttribute>(this Type t)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetFieldInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.IsFamily);
+        }
+
+        public static IEnumerable<FieldInfoAttributePair<TAttribute>> GetInternalFieldAttributes<TAttribute>(this Type t)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetFieldInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.IsAssembly);
+        }
+
+        public static IEnumerable<FieldInfoAttributePair<TAttribute>> GetPrivateFieldAttributes<TAttribute>(this Type t)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetFieldInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.IsPrivate);
+        }
+        #endregion
+
+        #region Fields (Individual)
+        public static IEnumerable<TAttribute> GetPublicFieldAttributes<TAttribute>(this Type t, string fieldName)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetFieldAttributesWithPredicate<TAttribute>(t, fieldName, pair => pair.MemberInfo.IsPublic);
+        }
+
+        public static IEnumerable<TAttribute> GetProtectedFieldAttributes<TAttribute>(this Type t, string fieldName)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetFieldAttributesWithPredicate<TAttribute>(t, fieldName, pair => pair.MemberInfo.IsFamily);
+        }
+
+        public static IEnumerable<TAttribute> GetInternalFieldAttributes<TAttribute>(this Type t, string fieldName)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetFieldAttributesWithPredicate<TAttribute>(t, fieldName, pair => pair.MemberInfo.IsAssembly);
+        }
+
+        public static IEnumerable<TAttribute> GetPrivateFieldAttributes<TAttribute>(this Type t, string fieldName)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetFieldAttributesWithPredicate<TAttribute>(t, fieldName, pair => pair.MemberInfo.IsPrivate);
+        }
+        #endregion
+
+        #region Methods (Groups)
+        public static IEnumerable<MethodInfoAttributePair<TAttribute>> GetPublicMethodAttributes<TAttribute>(this Type t)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetMethodInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.IsPublic);
+        }
+
+        public static IEnumerable<MethodInfoAttributePair<TAttribute>> GetProtectedMethodAttributes<TAttribute>(this Type t)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetMethodInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.IsFamily);
+        }
+
+        public static IEnumerable<MethodInfoAttributePair<TAttribute>> GetInternalMethodAttributes<TAttribute>(this Type t)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetMethodInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.IsAssembly);
+        }
+
+        public static IEnumerable<MethodInfoAttributePair<TAttribute>> GetPrivateMethodAttributes<TAttribute>(this Type t)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetMethodInfoAttributesWithPredicate<TAttribute>(t, pair => pair.MemberInfo.IsPrivate);
+        }
+        #endregion
+
+        #region Methods (Individual)
+        public static IEnumerable<TAttribute> GetPublicMethodAttributes<TAttribute>(this Type t, string methodName)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetMethodAttributesWithPredicate<TAttribute>(t, methodName, pair => pair.MemberInfo.IsPublic);
+        }
+
+        public static IEnumerable<TAttribute> GetProtectedMethodAttributes<TAttribute>(this Type t, string methodName)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetMethodAttributesWithPredicate<TAttribute>(t, methodName, pair => pair.MemberInfo.IsFamily);
+        }
+
+        public static IEnumerable<TAttribute> GetInternalMethodAttributes<TAttribute>(this Type t, string methodName)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetMethodAttributesWithPredicate<TAttribute>(t, methodName, pair => pair.MemberInfo.IsAssembly);
+        }
+
+        public static IEnumerable<TAttribute> GetPrivateMethodAttributes<TAttribute>(this Type t, string methodName)
+            where TAttribute : Attribute
+        {
+            return ReflectionTypeExtensions.GetMethodAttributesWithPredicate<TAttribute>(t, methodName, pair => pair.MemberInfo.IsPrivate);
         }
         #endregion
         #endregion

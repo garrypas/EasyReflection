@@ -42,9 +42,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MethodInfoAttributePair.cs" />
+    <Compile Include="MemberInfoAttributePair.cs" />
     <Compile Include="IDictionaryExtensions.cs" />
     <Compile Include="MemberInfoExtensions.cs" />
     <Compile Include="ObjectExtensions.cs" />
+    <Compile Include="FieldInfoAttributePair.cs" />
     <Compile Include="PropertyInfoAttributePairExtensions.cs" />
     <Compile Include="PropertyInfoAttributePair.cs" />
     <Compile Include="TypeExtensions.cs" />

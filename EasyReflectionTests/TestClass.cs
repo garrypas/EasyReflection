@@ -23,29 +23,43 @@ namespace EasyReflectionTests
         [TestAttributeB]
         protected string ProtectedProperty { get; set; }
 
+        [TestAttributeA]
+        [TestAttributeB]
         public string publicField;
-
+        
+        [TestAttributeB]
         internal string internalField;
-
+        
+        [TestAttributeA]
         private string privateField;
-
+        
+        [TestAttributeA]
+        [TestAttributeA]
+        [TestAttributeB]
         protected string protectedField;
 
+        [TestAttributeA]
+        [TestAttributeB]
         public string PublicMethod(string concatenate, string to)
         {
             return concatenate + to;
         }
 
+        [TestAttributeA]
         private int PrivateMethod(int add, int to)
         {
             return add + to;
         }
 
+        [TestAttributeB]
         internal List<string> InternalMethod(string item1, string item2)
         {
             return new List<string> { item1, item2 };
         }
 
+        [TestAttributeA]
+        [TestAttributeA]
+        [TestAttributeB]
         protected void ProtectedMethod(List<string> addItemTo)
         {
             addItemTo.Add("newItem");

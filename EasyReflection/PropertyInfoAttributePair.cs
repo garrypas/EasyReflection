@@ -4,17 +4,15 @@ using System.Reflection;
 
 namespace EasyReflection
 {
-    public class PropertyInfoAttributePair<TAttribute>
+    public class PropertyInfoAttributePair<TAttribute> : MemberInfoAttributePair<TAttribute, PropertyInfo>
         where TAttribute : Attribute
     {
         public PropertyInfoAttributePair(PropertyInfo propertyInfo, IEnumerable<TAttribute> attributes)
+            : base(propertyInfo, attributes) { }
+
+        public static implicit operator MemberInfoAttributePair<TAttribute, MemberInfo>(PropertyInfoAttributePair<TAttribute> pi)
         {
-            this.PropertyInfo = propertyInfo;
-            this.Attributes = attributes;
+            return new MemberInfoAttributePair<TAttribute,MemberInfo>(pi.MemberInfo, pi.Attributes);
         }
-
-        public PropertyInfo PropertyInfo { get; private set; }
-
-        public IEnumerable<TAttribute> Attributes { get; private set; }
     }
 }

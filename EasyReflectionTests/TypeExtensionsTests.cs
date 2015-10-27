@@ -553,7 +553,7 @@ namespace EasyReflectionTests
         [Test]
         public void GetsPublicGetterAttributes()
         {
-            typeof(TestClass).GetPublicGetterAttributes<TestAttributeA>().Select(pair => pair.PropertyInfo)
+            typeof(TestClass).GetPublicGetterAttributes<TestAttributeA>().Select(pair => pair.MemberInfo)
                 .GetNames()
                 .Should()
                 .Contain("PublicProperty")
@@ -565,7 +565,7 @@ namespace EasyReflectionTests
         {
             typeof(TestClass).GetPrivateGetterAttributes<TestAttributeA>()
                 .Should()
-                .Contain(pair => pair.PropertyInfo.Name == "PrivateProperty")
+                .Contain(pair => pair.MemberInfo.Name == "PrivateProperty")
                 .And.HaveCount(1);
         }
 
@@ -574,7 +574,7 @@ namespace EasyReflectionTests
         {
             typeof(TestClass).GetInternalGetterAttributes<TestAttributeB>()
                 .Should()
-                .Contain(pair => pair.PropertyInfo.Name == "InternalProperty")
+                .Contain(pair => pair.MemberInfo.Name == "InternalProperty")
                 .And.HaveCount(1);
         }
 
@@ -583,7 +583,7 @@ namespace EasyReflectionTests
         {
             typeof(TestClass).GetProtectedGetterAttributes<TestAttributeA>()
                 .Should()
-                .Contain(pair => pair.PropertyInfo.Name == "ProtectedProperty")
+                .Contain(pair => pair.MemberInfo.Name == "ProtectedProperty")
                 .And.Contain(pair => pair.Attributes.Count() == 2)
                 .And.HaveCount(1);
         }
@@ -592,7 +592,7 @@ namespace EasyReflectionTests
         public void GetsPublicSetterAttributes()
         {
             typeof(TestClass).GetPublicSetterAttributes<TestAttributeA>()
-                .Select(pair => pair.PropertyInfo)
+                .Select(pair => pair.MemberInfo)
                 .GetNames()
                 .Should()
                 .Contain("PublicProperty")
@@ -604,7 +604,7 @@ namespace EasyReflectionTests
         {
             typeof(TestClass).GetPrivateSetterAttributes<TestAttributeA>()
                 .Should()
-                .Contain(pair => pair.PropertyInfo.Name == "PrivateProperty")
+                .Contain(pair => pair.MemberInfo.Name == "PrivateProperty")
                 .And.HaveCount(1);
         }
 
@@ -613,7 +613,7 @@ namespace EasyReflectionTests
         {
             typeof(TestClass).GetInternalSetterAttributes<TestAttributeB>()
                 .Should()
-                .Contain(pair => pair.PropertyInfo.Name == "InternalProperty")
+                .Contain(pair => pair.MemberInfo.Name == "InternalProperty")
                 .And.HaveCount(1);
         }
 
@@ -622,17 +622,17 @@ namespace EasyReflectionTests
         {
             typeof(TestClass).GetProtectedSetterAttributes<TestAttributeA>()
                 .Should()
-                .Contain(pair => pair.PropertyInfo.Name == "ProtectedProperty")
+                .Contain(pair => pair.MemberInfo.Name == "ProtectedProperty")
                 .And.Contain(pair => pair.Attributes.Count() == 2)
                 .And.HaveCount(1);
         }
 
         [Test]
-        public void GetsAttributes()
+        public void GetsPropertyAttributes()
         {
             var expectedNames = new [] { "PublicProperty", "PrivateProperty", "ProtectedProperty" };
-            var propertyInfoAttributes = typeof(TestClass).GetAttributes<TestAttributeA>()
-                .Select(pair => pair.PropertyInfo)
+            var propertyInfoAttributes = typeof(TestClass).GetPropertyAttributes<TestAttributeA>()
+                .Select(pair => pair.MemberInfo)
                 .GetNames()
                 .Should()
                 .BeEquivalentTo(expectedNames)
@@ -674,14 +674,218 @@ namespace EasyReflectionTests
         }
 
         [Test]
-        public void GetsAttribute()
+        public void GetsPropertyAttribute()
         {
-            typeof(TestClass).GetAttribute<TestAttributeA>("PrivateProperty")
+            typeof(TestClass).GetPropertyAttribute<TestAttributeA>("PrivateProperty")
                 .Should()
                 .OnlyContain(a => a.GetType() == typeof(TestAttributeA))
                 .And.HaveCount(1);
         }
         #endregion        
+
+        #region Fields (Groups)
+        [Test]
+        public void GetsPublicFieldAttributes()
+        {
+            typeof(TestClass).GetPublicFieldAttributes<TestAttributeA>().Select(pair => pair.MemberInfo)
+                .GetNames()
+                .Should()
+                .Contain("publicField")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPrivateFieldAttributes()
+        {
+            typeof(TestClass).GetPrivateFieldAttributes<TestAttributeA>()
+                .Should()
+                .Contain(pair => pair.MemberInfo.Name == "privateField")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalFieldAttributes()
+        {
+            typeof(TestClass).GetInternalFieldAttributes<TestAttributeB>()
+                .Should()
+                .Contain(pair => pair.MemberInfo.Name == "internalField")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedFieldAttributes()
+        {
+            typeof(TestClass).GetProtectedFieldAttributes<TestAttributeA>()
+                .Should()
+                .Contain(pair => pair.MemberInfo.Name == "protectedField")
+                .And.Contain(pair => pair.Attributes.Count() == 2)
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsFieldAttributes()
+        {
+            var expectedNames = new[] { "publicField", "privateField", "protectedField" };
+            var fieldInfoAttributes = typeof(TestClass).GetFieldAttributes<TestAttributeA>()
+                .Select(pair => pair.MemberInfo)
+                .GetNames()
+                .Should()
+                .BeEquivalentTo(expectedNames)
+                .And.HaveSameCount(expectedNames);
+        }
+        #endregion
+
+        #region Fields (Individual)
+        [Test]
+        public void GetsPublicFieldAttribute()
+        {
+            typeof(TestClass).GetPublicFieldAttributes<TestAttributeA>("publicField")
+                .Should()
+                .HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPrivateFieldAttribute()
+        {
+            typeof(TestClass).GetPrivateFieldAttributes<TestAttributeA>("privateField")
+                .Should()
+                .HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalFieldAttribute()
+        {
+            typeof(TestClass).GetInternalFieldAttributes<TestAttributeB>("internalField")
+                .Should()
+                .HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedFieldAttribute()
+        {
+            typeof(TestClass).GetProtectedFieldAttributes<TestAttributeA>("protectedField")
+                .Should()
+                .HaveCount(2);
+        }
+
+        [Test]
+        public void GetsFieldAttribute()
+        {
+            typeof(TestClass).GetFieldAttribute<TestAttributeA>("privateField")
+                .Should()
+                .OnlyContain(a => a.GetType() == typeof(TestAttributeA))
+                .And.HaveCount(1);
+        }
+        #endregion
+
+        #region Methods (Groups)
+        [Test]
+        public void GetsPublicMethodAttributes()
+        {
+            typeof(TestClass).GetPublicMethodAttributes<TestAttributeA>().Select(pair => pair.MemberInfo)
+                .GetNames()
+                .Should()
+                .Contain("PublicMethod")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPrivateMethodAttributes()
+        {
+            typeof(TestClass).GetPrivateMethodAttributes<TestAttributeA>()
+                .Should()
+                .Contain(pair => pair.MemberInfo.Name == "PrivateMethod")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalMethodAttributes()
+        {
+            typeof(TestClass).GetInternalMethodAttributes<TestAttributeB>()
+                .Should()
+                .Contain(pair => pair.MemberInfo.Name == "InternalMethod")
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedMethodAttributes()
+        {
+            typeof(TestClass).GetProtectedMethodAttributes<TestAttributeA>()
+                .Should()
+                .Contain(pair => pair.MemberInfo.Name == "ProtectedMethod")
+                .And.Contain(pair => pair.Attributes.Count() == 2)
+                .And.HaveCount(1);
+        }
+
+        [Test]
+        public void GetsMethodAttributes()
+        {
+            var expectedNames = new[] { "PublicMethod", "PrivateMethod", "ProtectedMethod" };
+            var methodInfoAttributes = typeof(TestClass).GetMethodAttributes<TestAttributeA>()
+                .Select(pair => pair.MemberInfo)
+                .GetNames()
+                .Should()
+                .BeEquivalentTo(expectedNames)
+                .And.HaveSameCount(expectedNames);
+        }
+        #endregion
+
+        #region Methods (Individual)
+        [Test]
+        public void GetsPublicMethodAttribute()
+        {
+            typeof(TestClass).GetPublicMethodAttributes<TestAttributeA>("PublicMethod")
+                .Should()
+                .HaveCount(1);
+        }
+
+        [Test]
+        public void GetsPrivateMethodAttribute()
+        {
+            typeof(TestClass).GetPrivateMethodAttributes<TestAttributeA>("PrivateMethod")
+                .Should()
+                .HaveCount(1);
+        }
+
+        [Test]
+        public void GetsInternalMethodAttribute()
+        {
+            typeof(TestClass).GetInternalMethodAttributes<TestAttributeB>("InternalMethod")
+                .Should()
+                .HaveCount(1);
+        }
+
+        [Test]
+        public void GetsProtectedMethodAttribute()
+        {
+            typeof(TestClass).GetProtectedMethodAttributes<TestAttributeA>("ProtectedMethod")
+                .Should()
+                .HaveCount(2);
+        }
+
+        [Test]
+        public void GetsMethodAttribute()
+        {
+            typeof(TestClass).GetMethodAttribute<TestAttributeA>("PrivateMethod")
+                .Should()
+                .OnlyContain(a => a.GetType() == typeof(TestAttributeA))
+                .And.HaveCount(1);
+        }
+        #endregion
+
+        #region All
+        [Test]
+        public void GetsAttributes()
+        {
+            var expected = new[] { "PublicProperty", "PrivateProperty", "ProtectedProperty", "publicField", "privateField", "protectedField", "PublicMethod", "PrivateMethod", "ProtectedMethod" };
+
+            new TestClass().GetAttributes<TestAttributeA>()
+                .Select(pair => pair.MemberInfo)
+                .GetNames()
+                .Should()
+                .BeEquivalentTo(expected);
+        }
+        #endregion
         #endregion
     }
 }

@@ -15,7 +15,7 @@ namespace EasyReflectionTests
         public void GetsAttributes()
         {
             var expectedNames = new[] { "PublicProperty", "PrivateProperty", "ProtectedProperty" };
-            var propertyInfoAttributes = new TestClass().GetAttributes<TestAttributeA>()
+            var propertyInfoAttributes = new TestClass().GetPropertyAttributes<TestAttributeA>()
                 .Keyed()
                 .Select(keyed => keyed.Key)
                 .Should()
