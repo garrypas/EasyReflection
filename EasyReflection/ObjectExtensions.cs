@@ -28,6 +28,11 @@ namespace System
             return (T)obj.GetType().GetGetterSetter(memberName).GetValue(obj, indexer as object[]);
         }
 
+        public static object GetValue(this object obj, string memberName, params object[] indexer)
+        {
+            return GetValue<object>(obj, memberName, indexer);
+        }
+
         public static T Invoke<T>(this object obj, string methodName, params object[] arguments)
         {
             return InvokeCommon<T>(obj, methodName, NotGenericParameters, arguments);
@@ -68,6 +73,16 @@ namespace System
             where TAttribute : Attribute
         {
             return obj.GetType().GetAttribute<TAttribute>(propertyName);
+        }
+
+        public static IDictionary<string, object> ToDictionary(this object obj)
+        {
+            var dictionary = new Dictionary<string, object>();
+            foreach (var prop in obj.GetType().GetPublicGetters().Select(p => p.Name))
+            {
+                dictionary.Add(prop, obj.GetValue(prop));
+            }
+            return dictionary;
         }
     }
 }

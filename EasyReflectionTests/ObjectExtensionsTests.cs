@@ -107,5 +107,18 @@ namespace EasyReflectionTests
                 .And.HaveCount(1);
         }
         #endregion
+
+        #region Functionality
+
+        [Test]
+        public void MapsToDictionary()
+        {
+            var testClass = new TestClass();
+            testClass.PublicProperty = "Public Property";
+            var dictionary = testClass.ToDictionary();
+            dictionary.ShouldBeEquivalentTo(new Dictionary<string, object> { { "PublicProperty", testClass.PublicProperty } });
+        }
+
+        #endregion
     }
 }
