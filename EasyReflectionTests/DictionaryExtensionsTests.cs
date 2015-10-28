@@ -14,5 +14,13 @@ namespace EasyReflectionTests
             var testClass = dictionary.ToObject<TestClass>();
             Assert.AreEqual("Public Property", testClass.PublicProperty);
         }
+
+        [Test]
+        public void MapsFromDictionaryNonGeneric()
+        {
+            var dictionary = new Dictionary<string, object> { { "PublicProperty", "Public Property" }, { "IgnoreMe", "la la la" } };
+            var testClass = dictionary.ToObject(typeof(TestClass)) as TestClass;
+            Assert.AreEqual("Public Property", testClass.PublicProperty);
+        }
     }
 }

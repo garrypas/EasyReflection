@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace System
 {
@@ -126,14 +124,35 @@ namespace System
         #endregion
 
         #region Methods (Individual)
-        public static MethodInfo GetAnyMethod(this Type t, string methodName)
+        public static MethodInfo GetAnyMethod(this Type t, string methodName, IEnumerable<Type> arguments = null)
         {
-            return GetAnyMethod(GetAllMethods(t), methodName);
+            return GetAnyMethod(GetAllMethods(t), methodName, arguments);
         }
 
-        internal static MethodInfo GetAnyMethod(IEnumerable<MethodInfo> methodInfo, string methodName)
+        internal static MethodInfo GetAnyMethod(IEnumerable<MethodInfo> methodInfo, string methodName, IEnumerable<Type> arguments = null)
         {
-            return methodInfo.First(m => m.Name.Equals(methodName, StringComparison.InvariantCultureIgnoreCase));
+            var methods = methodInfo.Where(m => m.Name.Equals(methodName, StringComparison.InvariantCultureIgnoreCase));
+            if (arguments == null || methods.Count() < 2)
+            {
+                return methods.First();
+            }
+            
+            foreach (var method in methods)
+            {
+                var parameters = method.GetParameters().Select(p => p.ParameterType);
+                var allMatch = true;
+                for (var i = 0; i < parameters.Count(); i++)
+                {
+                    var parm = parameters.ElementAt(i);
+                    allMatch &= i < arguments.Count() && parm == arguments.ElementAt(i);
+                    if (!allMatch) break;
+                }
+                if (allMatch)
+                {
+                    return method;
+                }
+            }
+            throw new ArgumentException("Could not find a matching method given the argument types supplied.");
         }
         #endregion
 
@@ -151,46 +170,46 @@ namespace System
         #endregion
 
         #region Static Methods (Individual)
-        public static MethodInfo GetStaticMethod(this Type t, string methodName)
+        public static MethodInfo GetStaticMethod(this Type t, string methodName, IEnumerable<Type> arguments = null)
         {
-            return GetStaticMethod(GetStaticMethods(t), methodName);
+            return GetAnyMethod(GetStaticMethods(t), methodName, arguments);
         }
 
-        internal static MethodInfo GetStaticMethod(IEnumerable<MethodInfo> methodInfo, string methodName)
+        internal static MethodInfo GetStaticMethod(IEnumerable<MethodInfo> methodInfo, string methodName, IEnumerable<Type> arguments = null)
         {
-            return methodInfo.First(m => m.Name.Equals(methodName, StringComparison.InvariantCultureIgnoreCase));
+            return GetAnyMethod(methodInfo, methodName, arguments);
         }
         #endregion
 
         #region Static Methods (Functionality)
-        public static T Invoke<T>(this Type t, string methodName, params object[] arguments)
+        public static T Invoke<T>(this Type t, string methodName, IEnumerable<Type> typeArguments, params object[] arguments)
         {
-            return InvokeGenericCommon<T>(t, methodName, NotGenericParameters, arguments);
+            return InvokeGenericCommon<T>(t, methodName, typeArguments, NotGenericParameters, arguments);
         }
 
-        public static void Invoke(this Type t, string methodName, params object[] arguments)
+        public static void Invoke(this Type t, string methodName, IEnumerable<Type> typeArguments, params object[] arguments)
         {
-            InvokeGenericCommon<object>(t, methodName, NotGenericParameters, arguments);
+            InvokeGenericCommon<object>(t, methodName, typeArguments, NotGenericParameters, arguments);
         }
 
-        public static T InvokeGeneric<T>(this Type t, string methodName, IEnumerable<Type> genericParameters, params object[] arguments)
+        public static T InvokeGeneric<T>(this Type t, string methodName, IEnumerable<Type> typeArguments, IEnumerable<Type> genericParameters, params object[] arguments)
         {
-            return InvokeGenericCommon<T>(t, methodName, genericParameters, arguments);
+            return InvokeGenericCommon<T>(t, methodName, typeArguments, genericParameters, arguments);
         }
 
-        public static void InvokeGeneric(this Type t, string methodName, IEnumerable<Type> genericParameters, params object[] arguments)
+        public static void InvokeGeneric(this Type t, string methodName, IEnumerable<Type> typeArguments, IEnumerable<Type> genericParameters, params object[] arguments)
         {
-            InvokeGenericCommon<object>(t, methodName, genericParameters, arguments);
+            InvokeGenericCommon<object>(t, methodName, typeArguments, genericParameters, arguments);
         }
 
-        private static T InvokeGenericCommon<T>(this Type t, string methodName, IEnumerable<Type> genericParameters, params object[] arguments)
+        private static T InvokeGenericCommon<T>(this Type t, string methodName, IEnumerable<Type> typeArguments, IEnumerable<Type> genericParameters, params object[] arguments)
         {
-            var methodInfo = t.GetStaticMethod(methodName);
+            var methodInfo = t.GetStaticMethod(methodName, typeArguments);
             if(genericParameters != null && genericParameters.Any())
             {
                 methodInfo = methodInfo.MakeGenericMethod(genericParameters.ToArray());
             }
-            return (T)methodInfo.Invoke(null, arguments as object[]);
+            return (T)methodInfo.Invoke(null, arguments);
         }
         #endregion
 
@@ -224,7 +243,7 @@ namespace System
         internal static IEnumerable<TAttribute> GetAttributesWithPredicate<TAttribute>(this Type t, string propertyName, Func<PropertyInfoAttributePair<TAttribute>, bool> predicate = null)
             where TAttribute : Attribute
         {
-            return GetPropertyInfoAttributesWithPredicate<TAttribute>(t, predicate).First(pair => pair.PropertyInfo.Name == propertyName).Attributes;
+            return GetPropertyInfoAttributesWithPredicate(t, predicate).First(pair => pair.PropertyInfo.Name == propertyName).Attributes;
         }
         #endregion
         #endregion
@@ -238,8 +257,6 @@ namespace EasyReflection
 
     public static class TypeExtensions
     {
-        private static readonly Type[] NotGenericParameters = { };
-
         #region Properties (Groups)
         public static IEnumerable<PropertyInfo> GetPublicGetters(this Type t)
         {
@@ -520,24 +537,24 @@ namespace EasyReflection
         #endregion
 
         #region Methods (Individual)
-        public static MethodInfo GetPublicMethod(this Type t, string methodName)
+        public static MethodInfo GetPublicMethod(this Type t, string methodName, IEnumerable<Type> typeArguments = null)
         {
-            return ReflectionTypeExtensions.GetAnyMethod(t.GetPublicMethods(), methodName);
+            return ReflectionTypeExtensions.GetAnyMethod(t.GetPublicMethods(), methodName, typeArguments);
         }
 
-        public static MethodInfo GetPrivateMethod(this Type t, string methodName)
+        public static MethodInfo GetPrivateMethod(this Type t, string methodName, IEnumerable<Type> typeArguments = null)
         {
-            return ReflectionTypeExtensions.GetAnyMethod(t.GetPrivateMethods(), methodName);
+            return ReflectionTypeExtensions.GetAnyMethod(t.GetPrivateMethods(), methodName, typeArguments);
         }
 
-        public static MethodInfo GetInternalMethod(this Type t, string fieldName)
+        public static MethodInfo GetInternalMethod(this Type t, string fieldName, IEnumerable<Type> typeArguments = null)
         {
-            return ReflectionTypeExtensions.GetAnyMethod(t.GetInternalMethods(), fieldName);
+            return ReflectionTypeExtensions.GetAnyMethod(t.GetInternalMethods(), fieldName, typeArguments);
         }
 
-        public static MethodInfo GetProtectedMethod(this Type t, string methodName)
+        public static MethodInfo GetProtectedMethod(this Type t, string methodName, IEnumerable<Type> typeArguments = null)
         {
-            return ReflectionTypeExtensions.GetAnyMethod(t.GetProtectedMethods(), methodName);
+            return ReflectionTypeExtensions.GetAnyMethod(t.GetProtectedMethods(), methodName, typeArguments);
         }
         #endregion
 
@@ -565,24 +582,24 @@ namespace EasyReflection
         #endregion
 
         #region Static Methods (Individual)
-        public static MethodInfo GetPublicStaticMethod(this Type t, string methodName)
+        public static MethodInfo GetPublicStaticMethod(this Type t, string methodName, IEnumerable<Type> arguments = null)
         {
-            return ReflectionTypeExtensions.GetStaticMethod(t.GetPublicStaticMethods(), methodName);
+            return ReflectionTypeExtensions.GetStaticMethod(t.GetPublicStaticMethods(), methodName, arguments);
         }
 
-        public static MethodInfo GetPrivateStaticMethod(this Type t, string methodName)
+        public static MethodInfo GetPrivateStaticMethod(this Type t, string methodName, IEnumerable<Type> arguments = null)
         {
-            return ReflectionTypeExtensions.GetStaticMethod(t.GetPrivateStaticMethods(), methodName);
+            return ReflectionTypeExtensions.GetStaticMethod(t.GetPrivateStaticMethods(), methodName, arguments);
         }
 
-        public static MethodInfo GetInternalStaticMethod(this Type t, string fieldName)
+        public static MethodInfo GetInternalStaticMethod(this Type t, string fieldName, IEnumerable<Type> arguments = null)
         {
-            return ReflectionTypeExtensions.GetStaticMethod(t.GetInternalStaticMethods(), fieldName);
+            return ReflectionTypeExtensions.GetStaticMethod(t.GetInternalStaticMethods(), fieldName, arguments);
         }
 
-        public static MethodInfo GetProtectedStaticMethod(this Type t, string methodName)
+        public static MethodInfo GetProtectedStaticMethod(this Type t, string methodName, IEnumerable<Type> arguments = null)
         {
-            return ReflectionTypeExtensions.GetStaticMethod(t.GetProtectedStaticMethods(), methodName);
+            return ReflectionTypeExtensions.GetStaticMethod(t.GetProtectedStaticMethods(), methodName, arguments);
         }
         #endregion
 
@@ -591,49 +608,49 @@ namespace EasyReflection
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetPublicGetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetGetMethod(true).IsPublic);
+            return t.GetPropertyInfoAttributesWithPredicate<TAttribute>(pair => pair.PropertyInfo.GetGetMethod(true).IsPublic);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetProtectedGetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetGetMethod(true).IsFamily);
+            return t.GetPropertyInfoAttributesWithPredicate<TAttribute>(pair => pair.PropertyInfo.GetGetMethod(true).IsFamily);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetInternalGetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetGetMethod(true).IsAssembly);
+            return t.GetPropertyInfoAttributesWithPredicate<TAttribute>(pair => pair.PropertyInfo.GetGetMethod(true).IsAssembly);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetPrivateGetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetGetMethod(true).IsPrivate);
+            return t.GetPropertyInfoAttributesWithPredicate<TAttribute>(pair => pair.PropertyInfo.GetGetMethod(true).IsPrivate);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetPublicSetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetSetMethod(true).IsPublic);
+            return t.GetPropertyInfoAttributesWithPredicate<TAttribute>(pair => pair.PropertyInfo.GetSetMethod(true).IsPublic);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetProtectedSetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetSetMethod(true).IsFamily);
+            return t.GetPropertyInfoAttributesWithPredicate<TAttribute>(pair => pair.PropertyInfo.GetSetMethod(true).IsFamily);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetInternalSetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetSetMethod(true).IsAssembly);
+            return t.GetPropertyInfoAttributesWithPredicate<TAttribute>(pair => pair.PropertyInfo.GetSetMethod(true).IsAssembly);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetPrivateSetterAttributes<TAttribute>(this Type t)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(t, pair => pair.PropertyInfo.GetSetMethod(true).IsPrivate);
+            return t.GetPropertyInfoAttributesWithPredicate<TAttribute>(pair => pair.PropertyInfo.GetSetMethod(true).IsPrivate);
         }
         #endregion
 
@@ -641,49 +658,49 @@ namespace EasyReflection
         public static IEnumerable<TAttribute> GetPublicGetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsPublic);
+            return t.GetAttributesWithPredicate<TAttribute>(propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsPublic);
         }
 
         public static IEnumerable<TAttribute> GetProtectedGetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsFamily);
+            return t.GetAttributesWithPredicate<TAttribute>(propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsFamily);
         }
 
         public static IEnumerable<TAttribute> GetInternalGetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsAssembly);
+            return t.GetAttributesWithPredicate<TAttribute>(propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsAssembly);
         }
 
         public static IEnumerable<TAttribute> GetPrivateGetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsPrivate);
+            return t.GetAttributesWithPredicate<TAttribute>(propertyName, pair => pair.PropertyInfo.GetGetMethod(true).IsPrivate);
         }
 
         public static IEnumerable<TAttribute> GetPublicSetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetSetMethod(true).IsPublic);
+            return t.GetAttributesWithPredicate<TAttribute>(propertyName, pair => pair.PropertyInfo.GetSetMethod(true).IsPublic);
         }
 
         public static IEnumerable<TAttribute> GetProtectedSetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetSetMethod(true).IsFamily);
+            return t.GetAttributesWithPredicate<TAttribute>(propertyName, pair => pair.PropertyInfo.GetSetMethod(true).IsFamily);
         }
 
         public static IEnumerable<TAttribute> GetInternalSetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName, pair => pair.PropertyInfo.GetSetMethod(true).IsAssembly);
+            return t.GetAttributesWithPredicate<TAttribute>(propertyName, pair => pair.PropertyInfo.GetSetMethod(true).IsAssembly);
         }
 
         public static IEnumerable<TAttribute> GetPrivateSetterAttributes<TAttribute>(this Type t, string propertyName)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetAttributesWithPredicate<TAttribute>(t, propertyName);
+            return t.GetAttributesWithPredicate<TAttribute>(propertyName);
         }
         #endregion
         #endregion

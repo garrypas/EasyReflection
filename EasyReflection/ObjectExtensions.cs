@@ -5,11 +5,12 @@ using System.Linq;
 namespace System
 {
     using ReflectionTypeExtensions = System.TypeExtensions;
+
     public static class ObjectExtensions
     {
         private static readonly Type[] NotGenericParameters = { };
 
-        public static void SetValue(this object obj, string memberName, object value, params object[] indexer)
+        public static void SetValue(this object obj, string memberName, object value, object[] indexer = null)
         {
             var property = obj.GetType().GetGetterSetter(memberName);
             if (property != null)
@@ -25,7 +26,7 @@ namespace System
 
         public static T GetValue<T>(this object obj, string memberName, params object[] indexer)
         {
-            return (T)obj.GetType().GetGetterSetter(memberName).GetValue(obj, indexer as object[]);
+            return (T)obj.GetType().GetGetterSetter(memberName).GetValue(obj, indexer);
         }
 
         public static object GetValue(this object obj, string memberName, params object[] indexer)
@@ -33,40 +34,40 @@ namespace System
             return GetValue<object>(obj, memberName, indexer);
         }
 
-        public static T Invoke<T>(this object obj, string methodName, params object[] arguments)
+        public static T Invoke<T>(this object obj, string methodName, IEnumerable<Type> argumentTypes, params object[] arguments)
         {
-            return InvokeCommon<T>(obj, methodName, NotGenericParameters, arguments);
+            return InvokeCommon<T>(obj, methodName, argumentTypes, NotGenericParameters, arguments);
         }
 
-        public static void Invoke(this object obj, string methodName, params object[] arguments)
+        public static void Invoke(this object obj, string methodName, IEnumerable<Type> argumentTypes, params object[] arguments)
         {
-            InvokeCommon<object>(obj, methodName, NotGenericParameters, arguments);
+            InvokeCommon<object>(obj, methodName, argumentTypes, NotGenericParameters, arguments);
         }
 
-        public static T InvokeGeneric<T>(this object obj, string methodName, IEnumerable<Type> genericParameters, params object[] arguments)
+        public static T InvokeGeneric<T>(this object obj, string methodName, IEnumerable<Type> argumentTypes, IEnumerable<Type> genericParameters, params object[] arguments)
         {
-            return InvokeCommon<T>(obj, methodName, genericParameters, arguments);
+            return InvokeCommon<T>(obj, methodName, argumentTypes, genericParameters, arguments);
         }
 
-        public static void InvokeGeneric(this object obj, string methodName, IEnumerable<Type> genericParameters, params object[] arguments)
+        public static void InvokeGeneric(this object obj, string methodName, IEnumerable<Type> argumentTypes, IEnumerable<Type> genericParameters, params object[] arguments)
         {
-            InvokeCommon<object>(obj, methodName, genericParameters, arguments);
+            InvokeCommon<object>(obj, methodName, argumentTypes, genericParameters, arguments);
         }
 
-        private static T InvokeCommon<T>(object obj, string methodName, IEnumerable<Type> genericParameters, object[] arguments)
+        private static T InvokeCommon<T>(object obj, string methodName, IEnumerable<Type> argumentTypes, IEnumerable<Type> genericParameters, params object[] arguments)
         {
-            var methodInfo = obj.GetType().GetAnyMethod(methodName);
-            if(genericParameters != null && genericParameters.Any())
+            var methodInfo = obj.GetType().GetAnyMethod(methodName, argumentTypes);
+            if (genericParameters != null && genericParameters.Any())
             {
                 methodInfo = methodInfo.MakeGenericMethod(genericParameters.ToArray());
             }
-            return (T)methodInfo.Invoke(obj, arguments as object[]);
+            return (T)methodInfo.Invoke(obj, arguments);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetAttributes<TAttribute>(this object obj)
             where TAttribute : Attribute
         {
-            return ReflectionTypeExtensions.GetPropertyInfoAttributesWithPredicate<TAttribute>(obj.GetType());
+            return obj.GetType().GetPropertyInfoAttributesWithPredicate<TAttribute>();
         }
 
         public static IEnumerable<TAttribute> GetAttribute<TAttribute>(this object obj, string propertyName)
@@ -77,12 +78,7 @@ namespace System
 
         public static IDictionary<string, object> ToDictionary(this object obj)
         {
-            var dictionary = new Dictionary<string, object>();
-            foreach (var prop in obj.GetType().GetPublicGetters().Select(p => p.Name))
-            {
-                dictionary.Add(prop, obj.GetValue(prop));
-            }
-            return dictionary;
+            return obj.GetType().GetPublicGetters().Select(p => p.Name).ToDictionary(prop => prop, prop => obj.GetValue(prop));
         }
     }
 }

@@ -11,6 +11,8 @@ namespace EasyReflectionTests
     [TestFixture]
     public class TypeExtensionsTests
     {
+        public const IEnumerable<Type> NoTypeArguments = null;
+
         private Type publicClassType;
 
         [SetUp]
@@ -457,6 +459,14 @@ namespace EasyReflectionTests
             var methodInfo = this.publicClassType.GetProtectedMethod("ProtectedMethod");
             Assert.AreEqual("ProtectedMethod", methodInfo.Name);
         }
+
+        [Test]
+        public void GetsCorrectOverloadedMethod()
+        {
+            var overloadTestClass = new OverloadTestClass();
+            overloadTestClass.Invoke("OverloadedMethod", new[] { typeof(int) }, new object [] { 123 });
+            Assert.AreEqual(123, overloadTestClass.ValueFromOverloadedMethod);
+        }
         #endregion
 
         #region Static Methods (Groups)
@@ -525,7 +535,7 @@ namespace EasyReflectionTests
         public void InvokesStaticMethod()
         {
             var inst = new TestClass();
-            int result = typeof(TestClass).Invoke<int>("PrivateStaticMethod", 1, 2);
+            int result = typeof(TestClass).Invoke<int>("PrivateStaticMethod", NoTypeArguments, 1, 2);
             Assert.AreEqual(3, result);
         }
 
@@ -534,8 +544,8 @@ namespace EasyReflectionTests
         {
             var inst = new TestClass();
             var genericParameters = new[] { typeof(int) };
-            var result = typeof(TestClass).InvokeGeneric<string>("PrivateStaticGenericMethod", genericParameters, 123);
-            Assert.AreEqual("PrivateStaticGenericMethod:" + typeof(int).ToString() + "123", result);
+            var result = typeof(TestClass).InvokeGeneric<string>("PrivateStaticGenericMethod", NoTypeArguments, genericParameters, 123);
+            Assert.AreEqual("PrivateStaticGenericMethod:" + typeof(int) + "123", result);
         }
 
         [Test]
@@ -543,7 +553,7 @@ namespace EasyReflectionTests
         {
             var assignTo = new List<string>();
             var expectedList = new[] { "newItemForStatic" };
-            typeof(TestClass).Invoke("ProtectedStaticMethod", assignTo);
+            typeof(TestClass).Invoke("ProtectedStaticMethod", NoTypeArguments, assignTo);
             assignTo.Should().BeEquivalentTo(expectedList).And.HaveSameCount(expectedList);
         }
         #endregion 

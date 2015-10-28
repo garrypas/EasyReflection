@@ -5,6 +5,12 @@ namespace System.Collections.Generic
 {
     public static class IDictionaryExtensions
     {
+        public static object ToObject(this IDictionary<string, object> dictionary, Type typeTo)
+        {
+            var invokeGeneric = typeof(IDictionaryExtensions).GetPublicStaticMethod("ToObject", new[] { typeof(IDictionary<string, object>) });
+            return invokeGeneric.MakeGenericMethod(new [] { typeTo }).Invoke(null, new object[] { dictionary });
+        }
+
         public static TTo ToObject<TTo>(this IDictionary<string, object> dictionary)
             where TTo : new()
         {

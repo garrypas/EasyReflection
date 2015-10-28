@@ -50,6 +50,7 @@
     <Compile Include="DictionaryExtensionsTests.cs" />
     <Compile Include="ObjectExtensionsTests.cs" />
     <Compile Include="MemberInfoExtensionsTests.cs" />
+    <Compile Include="OverloadTestClass.cs" />
     <Compile Include="TestAttributeB.cs" />
     <Compile Include="TestAttributeA.cs" />
     <Compile Include="PropertyInfoAttributePairExtensionsTests.cs" />
