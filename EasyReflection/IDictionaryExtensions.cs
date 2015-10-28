@@ -1,5 +1,5 @@
-﻿using EasyReflection;
-using System.Linq;
+﻿using System.Linq;
+using EasyReflection;
 
 namespace System.Collections.Generic
 {
@@ -8,27 +8,41 @@ namespace System.Collections.Generic
         public static object ToObject(this IDictionary<string, object> dictionary, Type typeTo)
         {
             var invokeGeneric = typeof(IDictionaryExtensions).GetPublicStaticMethod("ToObject", new[] { typeof(IDictionary<string, object>) });
-            return invokeGeneric.MakeGenericMethod(new [] { typeTo }).Invoke(null, new object[] { dictionary });
+            return invokeGeneric.MakeGenericMethod(new[] { typeTo }).Invoke(null, new object[] { dictionary });
         }
 
         public static TTo ToObject<TTo>(this IDictionary<string, object> dictionary)
             where TTo : new()
         {
-            return ToObject<TTo, object>(dictionary);
+            var obj = new TTo();
+            ToObject<TTo, object>(dictionary, obj);
+            return obj;
+        }
+
+        public static void ToObject<TTo>(this IDictionary<string, object> dictionary, TTo destination)
+            where TTo : new()
+        {
+            ToObject<TTo, object>(dictionary, destination);
         }
 
         public static TTo ToObject<TTo, TValue>(this IDictionary<string, TValue> dictionary)
             where TTo : new()
         {
-            var t = new TTo();
-            foreach (var prop in typeof(TTo).GetPublicSetters().Select(p => p.Name))
+            var obj = new TTo();
+            ToObject(dictionary, obj);
+            return obj;
+        }
+
+        public static void ToObject<TTo, TValue>(this IDictionary<string, TValue> dictionary, TTo destination)
+            where TTo : new()
+        {
+            foreach (var prop in typeof(TTo).GetProperties().Where(p => p.GetSetMethod(true).IsPublic))
             {
-                if (dictionary.ContainsKey(prop))
+                if (dictionary.ContainsKey(prop.Name))
                 {
-                    t.SetValue(prop, dictionary[prop]);
+                    prop.SetValue(destination, dictionary[prop.Name], null);
                 }
             }
-            return t;
         }
     }
 }

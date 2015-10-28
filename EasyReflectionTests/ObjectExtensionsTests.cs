@@ -24,7 +24,7 @@ namespace EasyReflectionTests
         public void GetsObjectProperty()
         {
             var inst = new TestClass();
-            inst.SetValue("PublicProperty", "hello world");
+            inst.Set("PublicProperty", "hello world");
             Assert.AreEqual("hello world", type.GetGetterSetter("PublicProperty").GetValue(inst, null));
         }
 
@@ -32,7 +32,7 @@ namespace EasyReflectionTests
         public void SetsObjectProperty()
         {
             var inst = new TestClass();
-            inst.SetValue("PrivateProperty", "hello world");
+            inst.Set("PrivateProperty", "hello world");
             Assert.AreEqual("hello world", type.GetGetterSetter("PrivateProperty").GetValue(inst, null));
         }
 
@@ -40,7 +40,7 @@ namespace EasyReflectionTests
         public void GetsObjectField()
         {
             var inst = new TestClass();
-            inst.SetValue("PublicField", "hello world");
+            inst.Set("PublicField", "hello world");
             Assert.AreEqual("hello world", type.GetAnyField("PublicField").GetValue(inst));
         }
 
@@ -48,7 +48,7 @@ namespace EasyReflectionTests
         public void SetsObjectField()
         {
             var inst = new TestClass();
-            inst.SetValue("PrivateField", "hello world");
+            inst.Set("PrivateField", "hello world");
             Assert.AreEqual("hello world", type.GetAnyField("PrivateField").GetValue(inst));
         }
         #endregion
@@ -58,7 +58,7 @@ namespace EasyReflectionTests
         [Test]
         public void InvokesInstanceMethod()
         {
-            string result = new TestClass().Invoke<string>("PublicMethod", null, new object[] { "a", "b" });
+            string result = new TestClass().Call<string>("PublicMethod", null, new object[] { "a", "b" });
             Assert.AreEqual("ab", result);
         }
 
@@ -67,7 +67,7 @@ namespace EasyReflectionTests
         {
             var assignTo = new List<string>();
             var expectedList = new[] { "newItem" };
-            new TestClass().Invoke("ProtectedMethod", null, assignTo);
+            new TestClass().Call("ProtectedMethod", null, assignTo);
             assignTo.Should().BeEquivalentTo(expectedList).And.HaveSameCount(expectedList);
         }
 
@@ -79,7 +79,7 @@ namespace EasyReflectionTests
         public void InvokesInstanceGenericMethod()
         {
             var genericParameters = new[] { typeof(int) };
-            string result = new TestClass().InvokeGeneric<string>("PublicGenericMethod", null, genericParameters, 123);
+            string result = new TestClass().CallGeneric<string>("PublicGenericMethod", null, genericParameters, 123);
             Assert.AreEqual("PublicGenericMethod:" + typeof(int) + "123", result);
         }
     

@@ -10,7 +10,7 @@ namespace System
     {
         private static readonly Type[] NotGenericParameters = { };
 
-        public static void SetValue(this object obj, string memberName, object value, object[] indexer = null)
+        public static void Set(this object obj, string memberName, object value, object[] indexer = null)
         {
             var property = obj.GetType().GetGetterSetter(memberName);
             if (property != null)
@@ -24,44 +24,34 @@ namespace System
             }
         }
 
-        public static T GetValue<T>(this object obj, string memberName, params object[] indexer)
+        public static T Get<T>(this object obj, string memberName, params object[] indexer)
         {
             return (T)obj.GetType().GetGetterSetter(memberName).GetValue(obj, indexer);
         }
 
-        public static object GetValue(this object obj, string memberName, params object[] indexer)
+        public static object Get(this object obj, string memberName, params object[] indexer)
         {
-            return GetValue<object>(obj, memberName, indexer);
+            return Get<object>(obj, memberName, indexer);
         }
 
-        public static T Invoke<T>(this object obj, string methodName, IEnumerable<Type> argumentTypes, params object[] arguments)
+        public static T Call<T>(this object obj, string methodName, IEnumerable<Type> argumentTypes, params object[] arguments)
         {
-            return InvokeCommon<T>(obj, methodName, argumentTypes, NotGenericParameters, arguments);
+            return CallCommon<T>(obj, methodName, argumentTypes, NotGenericParameters, arguments);
         }
 
-        public static void Invoke(this object obj, string methodName, IEnumerable<Type> argumentTypes, params object[] arguments)
+        public static void Call(this object obj, string methodName, IEnumerable<Type> argumentTypes, params object[] arguments)
         {
-            InvokeCommon<object>(obj, methodName, argumentTypes, NotGenericParameters, arguments);
+            CallCommon<object>(obj, methodName, argumentTypes, NotGenericParameters, arguments);
         }
 
-        public static T InvokeGeneric<T>(this object obj, string methodName, IEnumerable<Type> argumentTypes, IEnumerable<Type> genericParameters, params object[] arguments)
+        public static T CallGeneric<T>(this object obj, string methodName, IEnumerable<Type> argumentTypes, IEnumerable<Type> genericParameters, params object[] arguments)
         {
-            return InvokeCommon<T>(obj, methodName, argumentTypes, genericParameters, arguments);
+            return CallCommon<T>(obj, methodName, argumentTypes, genericParameters, arguments);
         }
 
-        public static void InvokeGeneric(this object obj, string methodName, IEnumerable<Type> argumentTypes, IEnumerable<Type> genericParameters, params object[] arguments)
+        public static void CallGeneric(this object obj, string methodName, IEnumerable<Type> argumentTypes, IEnumerable<Type> genericParameters, params object[] arguments)
         {
-            InvokeCommon<object>(obj, methodName, argumentTypes, genericParameters, arguments);
-        }
-
-        private static T InvokeCommon<T>(object obj, string methodName, IEnumerable<Type> argumentTypes, IEnumerable<Type> genericParameters, params object[] arguments)
-        {
-            var methodInfo = obj.GetType().GetAnyMethod(methodName, argumentTypes);
-            if (genericParameters != null && genericParameters.Any())
-            {
-                methodInfo = methodInfo.MakeGenericMethod(genericParameters.ToArray());
-            }
-            return (T)methodInfo.Invoke(obj, arguments);
+            CallCommon<object>(obj, methodName, argumentTypes, genericParameters, arguments);
         }
 
         public static IEnumerable<PropertyInfoAttributePair<TAttribute>> GetAttributes<TAttribute>(this object obj)
@@ -78,7 +68,16 @@ namespace System
 
         public static IDictionary<string, object> ToDictionary(this object obj)
         {
-            return obj.GetType().GetPublicGetters().Select(p => p.Name).ToDictionary(prop => prop, prop => obj.GetValue(prop));
+            return obj.GetType().GetPublicGetters().Select(p => p.Name).ToDictionary(prop => prop, prop => obj.Get(prop));
+        }
+        private static T CallCommon<T>(object obj, string methodName, IEnumerable<Type> argumentTypes, IEnumerable<Type> genericParameters, params object[] arguments)
+        {
+            var methodInfo = obj.GetType().GetAnyMethod(methodName, argumentTypes);
+            if (genericParameters != null && genericParameters.Any())
+            {
+                methodInfo = methodInfo.MakeGenericMethod(genericParameters.ToArray());
+            }
+            return (T)methodInfo.Invoke(obj, arguments);
         }
     }
 }

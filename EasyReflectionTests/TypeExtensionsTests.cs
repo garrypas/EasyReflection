@@ -464,7 +464,7 @@ namespace EasyReflectionTests
         public void GetsCorrectOverloadedMethod()
         {
             var overloadTestClass = new OverloadTestClass();
-            overloadTestClass.Invoke("OverloadedMethod", new[] { typeof(int) }, new object [] { 123 });
+            overloadTestClass.Call("OverloadedMethod", new[] { typeof(int) }, new object [] { 123 });
             Assert.AreEqual(123, overloadTestClass.ValueFromOverloadedMethod);
         }
         #endregion
