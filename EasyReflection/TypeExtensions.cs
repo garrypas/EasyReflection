@@ -13,7 +13,7 @@ namespace System
         #region Properties (Groups)
         public static IEnumerable<PropertyInfo> GetGettersAndSetters(this Type t)
         {
-            return t.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+            return t.GetProperties(BindingFlagConstants.AllFieldsBindingFlags);
         }
 
         internal static IEnumerable<PropertyInfo> GetGettersAndSetters(Type t, Func<PropertyInfo, bool> whereClause)
@@ -37,7 +37,7 @@ namespace System
         #region Static Properties (Groups)
         public static IEnumerable<PropertyInfo> GetStaticGettersAndSetters(this Type t)
         {
-            return t.GetProperties(BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public);
+            return t.GetProperties(BindingFlagConstants.AllFieldsBindingFlagsStatic);
         }
 
         internal static IEnumerable<PropertyInfo> GetStaticGetterSetters(Type t, Func<PropertyInfo, bool> whereClause)
@@ -61,9 +61,8 @@ namespace System
         #region Fields (Groups)
         public static IEnumerable<FieldInfo> GetAllFields(this Type t)
         {
-            var fields = t.GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
-            var fieldsWithoutPropertyBackingFields = fields.Where(f => f.Name.StartsWith("<") == false && f.Name.EndsWith("k__BackingField") == false);
-            return fieldsWithoutPropertyBackingFields;
+            var fields = t.GetFields(BindingFlagConstants.AllFieldsBindingFlags);
+            return fields.Where(BackingFields.IsNotBackingField);
         }
 
         internal static IEnumerable<FieldInfo> GetAllFields(Type t, Func<FieldInfo, bool> whereClause)
@@ -87,8 +86,8 @@ namespace System
         #region Static Fields (Groups)
         public static IEnumerable<FieldInfo> GetStaticFields(this Type t)
         {
-            var StaticFields = t.GetFields(BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public);
-            var StaticFieldsWithoutPropertyBackingStaticFields = StaticFields.Where(f => f.Name.StartsWith("<") == false && f.Name.EndsWith("k__BackingField") == false);
+            var StaticFields = t.GetFields(BindingFlagConstants.AllFieldsBindingFlagsStatic);
+            var StaticFieldsWithoutPropertyBackingStaticFields = StaticFields.Where(BackingFields.IsNotBackingField);
             return StaticFieldsWithoutPropertyBackingStaticFields;
         }
 
@@ -113,7 +112,7 @@ namespace System
         #region Methods (Groups)
         public static IEnumerable<MethodInfo> GetAllMethods(Type t)
         {
-            return t.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+            return t.GetMethods(BindingFlagConstants.AllFieldsBindingFlags);
         }
 
         internal static IEnumerable<MethodInfo> GetAllMethods(Type t, Func<MethodInfo, bool> whereClause)
@@ -159,7 +158,7 @@ namespace System
         #region Static Methods (Groups)
         public static IEnumerable<MethodInfo> GetStaticMethods(Type t)
         {
-            return t.GetMethods(BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public);
+            return t.GetMethods(BindingFlagConstants.AllFieldsBindingFlagsStatic);
         }
 
         internal static IEnumerable<MethodInfo> GetStaticMethods(Type t, Func<MethodInfo, bool> whereClause)
@@ -247,7 +246,6 @@ namespace System
         }
         #endregion
         #endregion
-
     }
 }
 

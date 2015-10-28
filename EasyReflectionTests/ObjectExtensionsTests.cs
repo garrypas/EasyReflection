@@ -1,10 +1,9 @@
-﻿using System;
+﻿using FluentAssertions;
 using NUnit.Framework;
-using System.Reflection;
-using System.Linq;
+using System;
 using System.Collections.Generic;
-using FluentAssertions;
-using EasyReflection;
+using System.Linq;
+using System.Reflection;
 
 namespace EasyReflectionTests
 {
@@ -20,6 +19,7 @@ namespace EasyReflectionTests
         }
 
         #region Object Manipulation
+
         [Test]
         public void GetsObjectProperty()
         {
@@ -51,14 +51,15 @@ namespace EasyReflectionTests
             inst.Set("PrivateField", "hello world");
             Assert.AreEqual("hello world", type.GetAnyField("PrivateField").GetValue(inst));
         }
-        #endregion
+
+        #endregion Object Manipulation
 
         #region Method Invokation
 
         [Test]
         public void InvokesInstanceMethod()
         {
-            string result = new TestClass().Call<string>("PublicMethod", null, new object[] { "a", "b" });
+            string result = new TestClass().Call<string>("PublicMethod", new Type[] { typeof(string), typeof(string) }, new object[] { "a", "b" });
             Assert.AreEqual("ab", result);
         }
 
@@ -71,7 +72,7 @@ namespace EasyReflectionTests
             assignTo.Should().BeEquivalentTo(expectedList).And.HaveSameCount(expectedList);
         }
 
-        #endregion
+        #endregion Method Invokation
 
         #region Generic Method Invokation
 
@@ -82,10 +83,11 @@ namespace EasyReflectionTests
             string result = new TestClass().CallGeneric<string>("PublicGenericMethod", null, genericParameters, 123);
             Assert.AreEqual("PublicGenericMethod:" + typeof(int) + "123", result);
         }
-    
-        #endregion
+
+        #endregion Generic Method Invokation
 
         #region Attributes
+
         [Test]
         public void GetsAttributes()
         {
@@ -106,7 +108,8 @@ namespace EasyReflectionTests
                 .OnlyContain(a => a.GetType() == typeof(TestAttributeA))
                 .And.HaveCount(1);
         }
-        #endregion
+
+        #endregion Attributes
 
         #region Functionality
 
@@ -117,8 +120,11 @@ namespace EasyReflectionTests
             testClass.PublicProperty = "Public Property";
             var dictionary = testClass.ToDictionary();
             dictionary.ShouldBeEquivalentTo(new Dictionary<string, object> { { "PublicProperty", testClass.PublicProperty } });
+#if DEBUG
+            dictionary.ExecutionTimeOf(d => d.ToObject(typeof(TestClass))).ShouldNotExceed(TimeSpan.FromMilliseconds(2));
+#endif
         }
 
-        #endregion
+        #endregion Functionality
     }
 }

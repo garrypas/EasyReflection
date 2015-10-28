@@ -4,8 +4,6 @@ using System.Linq;
 
 namespace System
 {
-    using ReflectionTypeExtensions = System.TypeExtensions;
-
     public static class ObjectExtensions
     {
         private static readonly Type[] NotGenericParameters = { };
@@ -70,6 +68,7 @@ namespace System
         {
             return obj.GetType().GetPublicGetters().Select(p => p.Name).ToDictionary(prop => prop, prop => obj.Get(prop));
         }
+
         private static T CallCommon<T>(object obj, string methodName, IEnumerable<Type> argumentTypes, IEnumerable<Type> genericParameters, params object[] arguments)
         {
             var methodInfo = obj.GetType().GetAnyMethod(methodName, argumentTypes);

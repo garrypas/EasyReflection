@@ -42,6 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants\BindingFlagConstants.cs" />
+    <Compile Include="Helpers\BackingFields.cs" />
     <Compile Include="IDictionaryExtensions.cs" />
     <Compile Include="MemberInfoExtensions.cs" />
     <Compile Include="ObjectExtensions.cs" />

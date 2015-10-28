@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using EasyReflection;
 
 namespace System.Collections.Generic
 {
@@ -7,8 +6,9 @@ namespace System.Collections.Generic
     {
         public static object ToObject(this IDictionary<string, object> dictionary, Type typeTo)
         {
-            var invokeGeneric = typeof(IDictionaryExtensions).GetPublicStaticMethod("ToObject", new[] { typeof(IDictionary<string, object>) });
-            return invokeGeneric.MakeGenericMethod(new[] { typeTo }).Invoke(null, new object[] { dictionary });
+            var obj = Activator.CreateInstance(typeTo);
+            ToObjectHelper(typeTo, dictionary, obj);
+            return obj;
         }
 
         public static TTo ToObject<TTo>(this IDictionary<string, object> dictionary)
@@ -36,7 +36,12 @@ namespace System.Collections.Generic
         public static void ToObject<TTo, TValue>(this IDictionary<string, TValue> dictionary, TTo destination)
             where TTo : new()
         {
-            foreach (var prop in typeof(TTo).GetProperties().Where(p => p.GetSetMethod(true).IsPublic))
+            ToObjectHelper(typeof(TTo), dictionary.ToDictionary(kvp => kvp.Key, kvp => kvp.Value as object), destination);
+        }
+
+        private static void ToObjectHelper(Type t, IDictionary<string, object> dictionary, object destination)
+        {
+            foreach (var prop in t.GetProperties().Where(p => p.GetSetMethod(true).IsPublic))
             {
                 if (dictionary.ContainsKey(prop.Name))
                 {
