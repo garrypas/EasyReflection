@@ -530,7 +530,7 @@ namespace EasyReflectionTests
         }
         #endregion
 
-        #region Static Methods (Functionality)
+        #region Methods (Functionality)
         [Test]
         public void InvokesStaticMethod()
         {
@@ -556,7 +556,27 @@ namespace EasyReflectionTests
             typeof(TestClass).Invoke("ProtectedStaticMethod", NoTypeArguments, assignTo);
             assignTo.Should().BeEquivalentTo(expectedList).And.HaveSameCount(expectedList);
         }
-        #endregion 
+
+        [Test]
+        public void TypesMatchThenClassOrSubclassOfIsTrue()
+        {
+            Assert.True(typeof(string).IsClassOrSubclassOf(typeof(string)));
+        }
+
+        [Test]
+        public void Type1IsSubclassOfType2Then_ClassOrSubclassOfIsTrue()
+        {
+            Assert.True(typeof(string).IsClassOrSubclassOf(typeof(object)));
+        }
+
+        [Test]
+        public void Type1IsNotSubclassOfType2ThenClassOrSubclassOfIsFalse()
+        {
+            Assert.False(typeof(object).IsClassOrSubclassOf(typeof(string)));
+        }
+
+
+        #endregion
 
         #region Attributes
         #region Properties (Groups)

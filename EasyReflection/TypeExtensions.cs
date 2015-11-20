@@ -180,7 +180,7 @@ namespace System
         }
         #endregion
 
-        #region Static Methods (Functionality)
+        #region Methods (Functionality)
         public static T Invoke<T>(this Type t, string methodName, IEnumerable<Type> typeArguments, params object[] arguments)
         {
             return InvokeGenericCommon<T>(t, methodName, typeArguments, NotGenericParameters, arguments);
@@ -199,6 +199,11 @@ namespace System
         public static void InvokeGeneric(this Type t, string methodName, IEnumerable<Type> typeArguments, IEnumerable<Type> genericParameters, params object[] arguments)
         {
             InvokeGenericCommon<object>(t, methodName, typeArguments, genericParameters, arguments);
+        }
+
+        public static bool IsClassOrSubclassOf(this Type t, Type c)
+        {
+            return t == c || t.IsSubclassOf(c);
         }
 
         private static T InvokeGenericCommon<T>(this Type t, string methodName, IEnumerable<Type> typeArguments, IEnumerable<Type> genericParameters, params object[] arguments)
